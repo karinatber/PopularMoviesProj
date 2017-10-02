@@ -1,6 +1,5 @@
 package com.example.autotests.popularmoviesapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public static final String MOVIES = "Movies";
     public static final String POPULARITY = "popular";
     public static final String TOP_RATED = "top_rated";
+    public static final String SORT_BY = "sort_by";
     public static final int VERTICAL = 0;
     public static final int HORIZONTAL = 1;
 
@@ -61,26 +61,24 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         GridLayoutManager manager;
 
         mAdapter = new MoviesAdapter(this);
-
+        mSortBy = POPULARITY;
         if (savedInstanceState != null) {
             mMoviesList = savedInstanceState.getParcelableArrayList(MOVIES);
             mAdapter.setMovieData(mMoviesList);
+            mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
-            loadTMDBData(POPULARITY);
+            loadTMDBData(mSortBy);
         }
 
-        int orientation = getOrientation(this);
+        int orientation = getOrientation();
         if (orientation==VERTICAL) {
             manager = new GridLayoutManager(this, 2);
         } else {
             manager = new GridLayoutManager(this, 3);
         }
-       /* LayoutParams lp = manager.generateDefaultLayoutParams();
-        lp.setMargins(10, 10, 10, 10);
-        manager.generateLayoutParams(lp);
-*/
+
         mMoviesRecyclerView.hasFixedSize();
 
         mMoviesRecyclerView.setLayoutManager(manager);
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private void loadTMDBData(String sortBy) {
         showMoviesData();
-        mSortBy = sortBy;
+        //mSortBy = sortBy;
         mLoadIndicator.setVisibility(View.VISIBLE);
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         new RequestDataAsyncTask().execute(sortBy);
@@ -108,8 +106,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        Log.i(TAG,"onSaveInstanceState was called");
         if (mMoviesList != null){
             outState.putParcelableArrayList(MOVIES, (ArrayList<? extends Parcelable>) mMoviesList);
+            outState.putString(SORT_BY, mSortBy);
+            Log.d(TAG, "onSaveInstanceState -> Sort by: "+mSortBy);
             //outPersistentState.putString(SORT_BY, mSortBy);
         }
         super.onSaveInstanceState(outState, outPersistentState);
@@ -179,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+        if (mSortBy == TOP_RATED){
+            menu.getItem(R.id.option_top_rated).setChecked(true);
+        }
         return true;
     }
 
@@ -191,18 +195,20 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 if (!item.isChecked()) {
                     loadTMDBData(POPULARITY);
                     item.setChecked(true);
+                    mSortBy = POPULARITY;
                 }
                 return true;
             case R.id.option_top_rated:
                 if (!item.isChecked()){
                     loadTMDBData(TOP_RATED);
                     item.setChecked(true);
+                    mSortBy = TOP_RATED;
                 }
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
-    public int getOrientation(Context context){
+    public int getOrientation(){
         Display display = getWindowManager().getDefaultDisplay();
         if (display.getRotation() == Surface.ROTATION_0 || display.getRotation() == Surface.ROTATION_180)
             return VERTICAL;
