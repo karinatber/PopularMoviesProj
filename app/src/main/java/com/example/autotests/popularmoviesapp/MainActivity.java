@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    public void onSaveInstanceState(Bundle outState) {
         Log.i(TAG,"onSaveInstanceState was called");
         if (mMoviesList != null){
             outState.putParcelableArrayList(MOVIES, (ArrayList<? extends Parcelable>) mMoviesList);
@@ -113,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             Log.d(TAG, "onSaveInstanceState -> Sort by: "+mSortBy);
             //outPersistentState.putString(SORT_BY, mSortBy);
         }
-        super.onSaveInstanceState(outState, outPersistentState);
+        super.onSaveInstanceState(outState);
     }
 
     /* make error message visible */
@@ -181,7 +180,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         if (mSortBy == TOP_RATED){
-            menu.getItem(R.id.option_top_rated).setChecked(true);
+            menu.getItem(0).setChecked(false);
+
         }
         return true;
     }
