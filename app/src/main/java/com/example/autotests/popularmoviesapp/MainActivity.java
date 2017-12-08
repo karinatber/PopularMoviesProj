@@ -1,6 +1,8 @@
 package com.example.autotests.popularmoviesapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
 import com.example.autotests.popularmoviesapp.utils.MoviesJson;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
@@ -38,11 +41,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public MoviesAdapter mAdapter;
     private static String mSortBy;
     public List<ResultsItem> mMoviesList;
+    private SQLiteDatabase mDb;
 
     public static final String EXTRA_MOVIE = "Movie";
     public static final String MOVIES = "Movies";
     public static final String POPULARITY = "popular";
     public static final String TOP_RATED = "top_rated";
+    public static final String FAVORITES = "favorites";
     public static final String SORT_BY = "sort_by";
     public static final int VERTICAL = 0;
     public static final int HORIZONTAL = 1;
@@ -102,7 +107,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         new RequestDataAsyncTask().execute(sortBy);
     }
-
+    private void loadFavorites(){
+        FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(this);
+        mDb = dbHelper.getReadableDatabase();
+    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.i(TAG,"onSaveInstanceState was called");
@@ -203,6 +211,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                     loadTMDBData(TOP_RATED);
                     item.setChecked(true);
                     mSortBy = TOP_RATED;
+                }
+                return true;
+            case R.id.option_favorites:
+                if(!item.isChecked()){
+                    item.setChecked(true);
+                    loadFavorites();
+                    mSortBy = FAVORITES;
                 }
                 return true;
         }

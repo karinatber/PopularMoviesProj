@@ -12,6 +12,9 @@
             android:orderInCategory="1"
             android:checked="true"/>
         <item
+            android:id="@+id/option_favorites"
+            android:title="@string/favorites"/>
+        <item
             android:id="@+id/option_top_rated"
             android:title="@string/top_rated"/>
     </group>
