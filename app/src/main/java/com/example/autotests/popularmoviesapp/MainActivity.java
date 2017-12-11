@@ -1,7 +1,7 @@
 package com.example.autotests.popularmoviesapp;
 
-import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
 import com.example.autotests.popularmoviesapp.utils.MoviesJson;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
@@ -110,6 +111,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private void loadFavorites(){
         FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(this);
         mDb = dbHelper.getReadableDatabase();
+        Cursor cursor = mDb.query(
+                FavoritesEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                FavoritesEntry.COLUMN_NAME
+        );
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
