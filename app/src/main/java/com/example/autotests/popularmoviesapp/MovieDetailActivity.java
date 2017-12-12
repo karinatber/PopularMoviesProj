@@ -75,7 +75,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     }
     private void addNewFavorite(){
         ContentValues contentValues = new ContentValues();
-        contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_NAME, mMovieDetails.getTitle());
+        contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE, mMovieDetails.getTitle());
         contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_DATE, mMovieDetails.getReleaseDate());
         mDb.insert(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, null, contentValues);
     }

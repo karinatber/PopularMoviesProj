@@ -21,9 +21,9 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_FAVORITES_TABLE =
                 "CREATE TABLE "+ FavoritesEntry.TABLE_NAME + " ("+
                         FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTO INCREMENT, "+
-                        FavoritesEntry.COLUMN_NAME + " TEXT NOT NULL, "+
+                        FavoritesEntry.COLUMN_TITLE + " TEXT NOT NULL, "+
                         FavoritesEntry.COLUMN_DATE + " TEXT NOT NULL);";
-//                        " UNIQUE (" + FavoritesEntry.COLUMN_NAME + ") ON CONFLICT REPLACE);";
+//                        " UNIQUE (" + FavoritesEntry.COLUMN_TITLE + ") ON CONFLICT REPLACE);";
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
     }
 

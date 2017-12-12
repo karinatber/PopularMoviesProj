@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public class FavoriteMoviesContract  {
     public static final class FavoritesEntry implements BaseColumns {
         public static final String TABLE_NAME = "favorites";
-        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_TITLE = "name";
         public static final String COLUMN_DATE = "date";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_RATING = "rating";

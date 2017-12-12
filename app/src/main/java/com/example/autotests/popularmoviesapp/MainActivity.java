@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 null,
                 null,
                 null,
-                FavoritesEntry.COLUMN_NAME
+                FavoritesEntry.COLUMN_TITLE
         );
     }
     @Override

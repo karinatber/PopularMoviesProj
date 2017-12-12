@@ -1,6 +1,7 @@
 package com.example.autotests.popularmoviesapp;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -21,14 +23,15 @@ import java.util.List;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
     private List<ResultsItem> mMovieData;
+    private Cursor mCursor;
     private final MoviesAdapterOnClickHandler mOnClickHandler;
 
     public interface MoviesAdapterOnClickHandler{
         void onClick (ResultsItem movieDetails);
     }
 
-    public MoviesAdapter(MoviesAdapterOnClickHandler mOnClickHandler){
-
+    public MoviesAdapter(MoviesAdapterOnClickHandler mOnClickHandler, Cursor cursor){
+        this.mCursor = cursor;
         this.mOnClickHandler = mOnClickHandler;
     }
 
@@ -46,13 +49,22 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
-        ResultsItem movieItem = mMovieData.get(position);
-        String title = movieItem.getTitle();
-        holder.mMovieTextItem.setText(title);
-        URL imageUrlPath = NetworkUtils.buildImageUrl(movieItem.getPosterPath());
-        //Picasso.with(holder.context).load(imageUrlPath.toString()).centerCrop().resize(200, 200).into(holder.mMovieImage);
+        // Move the mCursor to the position of the item to be displayed
+        if (!mCursor.moveToPosition(position))
+            return; // fail if returned null
+        String title;
+        URL imageUrlPath;
 
-        Picasso.with(holder.context).load(imageUrlPath.toString()).fit().into(holder.mMovieImage);
+        if (mCursor != null){
+
+        } else {
+            ResultsItem movieItem = mMovieData.get(position);
+            String title = movieItem.getTitle();
+            holder.mMovieTextItem.setText(title);
+            URL imageUrlPath = NetworkUtils.buildImageUrl(movieItem.getPosterPath());
+            //Picasso.with(holder.context).load(imageUrlPath.toString()).centerCrop().resize(200, 200).into(holder.mMovieImage);
+            Picasso.with(holder.context).load(imageUrlPath.toString()).fit().into(holder.mMovieImage);
+        }
     }
 
     @Override
