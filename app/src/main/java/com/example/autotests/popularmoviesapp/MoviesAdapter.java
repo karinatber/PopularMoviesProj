@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.google.gson.Gson;
@@ -49,22 +50,24 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
+        ResultsItem movieItem;
+        boolean isCursorOK = false;
         // Move the mCursor to the position of the item to be displayed
-        if (!mCursor.moveToPosition(position))
-            return; // fail if returned null
-        String title;
-        URL imageUrlPath;
-
         if (mCursor != null){
-
-        } else {
-            ResultsItem movieItem = mMovieData.get(position);
-            String title = movieItem.getTitle();
-            holder.mMovieTextItem.setText(title);
-            URL imageUrlPath = NetworkUtils.buildImageUrl(movieItem.getPosterPath());
-            //Picasso.with(holder.context).load(imageUrlPath.toString()).centerCrop().resize(200, 200).into(holder.mMovieImage);
-            Picasso.with(holder.context).load(imageUrlPath.toString()).fit().into(holder.mMovieImage);
+            isCursorOK = mCursor.moveToPosition(position);
         }
+        if (isCursorOK){
+            Gson gson = new Gson();
+            movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
+        } else {
+            movieItem = mMovieData.get(position);
+        }
+        String title = movieItem.getTitle();
+        holder.mMovieTextItem.setText(title);
+        URL imageUrlPath = NetworkUtils.buildImageUrl(movieItem.getPosterPath());
+        //Picasso.with(holder.context).load(imageUrlPath.toString()).centerCrop().resize(200, 200).into(holder.mMovieImage);
+        Picasso.with(holder.context).load(imageUrlPath.toString()).fit().into(holder.mMovieImage);
+
     }
 
     @Override
@@ -98,5 +101,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         mMovieData = movieData;
         notifyDataSetChanged();
     }
-
+    public void setFavoritesCursor(Cursor cursor){
+        this.mCursor = cursor;
+    }
 }

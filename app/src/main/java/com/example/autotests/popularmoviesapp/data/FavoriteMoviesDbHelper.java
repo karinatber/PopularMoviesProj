@@ -20,7 +20,7 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         final String SQL_CREATE_FAVORITES_TABLE =
                 "CREATE TABLE "+ FavoritesEntry.TABLE_NAME + " ("+
-                        FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTO INCREMENT, "+
+                        FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
                         FavoritesEntry.COLUMN_TITLE + " TEXT NOT NULL, "+
                         FavoritesEntry.COLUMN_DATE + " TEXT NOT NULL);";
 //                        " UNIQUE (" + FavoritesEntry.COLUMN_TITLE + ") ON CONFLICT REPLACE);";

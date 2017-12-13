@@ -65,13 +65,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
         GridLayoutManager manager;
 
-        mAdapter = new MoviesAdapter(this);
+        mAdapter = new MoviesAdapter(this, null);
         mSortBy = POPULARITY;
+
         if (savedInstanceState != null) {
             mMoviesList = savedInstanceState.getParcelableArrayList(MOVIES);
             mAdapter.setMovieData(mMoviesList);
             mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
+            if (FAVORITES.equals(mSortBy)){
+                mAdapter.setFavoritesCursor(loadFavorites());
+            }
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
             loadTMDBData(mSortBy);
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         new RequestDataAsyncTask().execute(sortBy);
     }
-    private void loadFavorites(){
+    private Cursor loadFavorites(){
         FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(this);
         mDb = dbHelper.getReadableDatabase();
         Cursor cursor = mDb.query(
@@ -120,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 null,
                 FavoritesEntry.COLUMN_TITLE
         );
+        return cursor;
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -226,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             case R.id.option_favorites:
                 if(!item.isChecked()){
                     item.setChecked(true);
-                    loadFavorites();
+                    mAdapter.setFavoritesCursor(loadFavorites());
                     mSortBy = FAVORITES;
                 }
                 return true;

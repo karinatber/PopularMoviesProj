@@ -21,6 +21,10 @@
 
         <activity android:name=".MovieDetailActivity"
             android:parentActivityName=".MainActivity"/>
+        <provider
+            android:authorities="com.example.autotests.popularmoviesapp"
+            android:name=".data.FavoriteMoviesProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

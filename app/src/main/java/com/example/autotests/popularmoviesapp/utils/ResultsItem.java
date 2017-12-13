@@ -222,21 +222,21 @@ public class ResultsItem implements Parcelable{
 
 	@Override
 	public String toString() {
-		return "ResultsItem:[ "+
-				"  {overview:'" + overview + '\'' +
-				", {originalLanguage:'" + originalLanguage + '\'' +
-				", {originalTitle:'" + originalTitle + '\'' +
-				", {video:" + video +
-				", {title:'" + title + '\'' +
-				", {genreIds:" + genreIds +
-				", {posterPath:'" + posterPath + '\'' +
-				", {backdropPath:" + backdropPath +
-				", {releaseDate:'" + releaseDate + '\'' +
-				", {voteAverage:" + voteAverage +
-				", {popularity:" + popularity +
-				", {id:" + id +
-				", {adult:" + adult +
-				", {voteCount:" + voteCount +'}'+
-				"]";
+		return "{ ResultsItem:[ "+
+                "  {overview:\"" + overview + "\"}"+
+                ", {originalLanguage:\"" + originalLanguage + "\"}" +
+                ", {originalTitle:\"" + originalTitle + "\"}" +
+                ", {video:\"" + video + "\"}" +
+                ", {title:\"" + title + "\"}" +
+                ", {genreIds:\"" + genreIds + "\"}" +
+                ", {posterPath:\"" + posterPath + "\"}" +
+                ", {backdropPath:" + backdropPath + "\"}" +
+                ", {releaseDate:\"" + releaseDate + "\"}" +
+                ", {voteAverage:\"" + voteAverage + "\"}" +
+                ", {popularity:\"" + popularity + "\"}" +
+                ", {id:\"" + id + "\"}" +
+                ", {adult:\"" + adult + "\"}" +
+                ", {voteCount:\"" + voteCount + "\"}" +
+                "]}";
 	}
 }
