@@ -1,15 +1,19 @@
 package com.example.autotests.popularmoviesapp;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
@@ -73,11 +77,15 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
                 break;
         }
     }
-    private void addNewFavorite(){
+    private void addNewFavorite() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE, mMovieDetails.toString());
         contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_DATE, mMovieDetails.getReleaseDate());
-        mDb.insert(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, null, contentValues);
+        Uri uri = getContentResolver().insert(FavoriteMoviesContract.FavoritesEntry.CONTENT_URI, contentValues);
+        if (uri != null) {
+            Log.v(MainActivity.class.getSimpleName(), "Favorite added to database, Uri: " + uri);
+            Toast.makeText(this, mMovieDetails.getTitle()+"added to favorites", Toast.LENGTH_LONG).show();
+        }
     }
     public void isMovieFavorite(){
 

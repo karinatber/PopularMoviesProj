@@ -11,7 +11,7 @@ import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.Favori
 
 public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "favorites.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     public FavoriteMoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -22,8 +22,8 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
                 "CREATE TABLE "+ FavoritesEntry.TABLE_NAME + " ("+
                         FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
                         FavoritesEntry.COLUMN_TITLE + " TEXT NOT NULL, "+
-                        FavoritesEntry.COLUMN_DATE + " TEXT NOT NULL);";
-//                        " UNIQUE (" + FavoritesEntry.COLUMN_TITLE + ") ON CONFLICT REPLACE);";
+                        FavoritesEntry.COLUMN_DATE + " TEXT NOT NULL);"+
+                        " UNIQUE (" + FavoritesEntry.COLUMN_TITLE + ") ON CONFLICT REPLACE);";
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
     }
 
