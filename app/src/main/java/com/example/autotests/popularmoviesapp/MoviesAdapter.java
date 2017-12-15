@@ -3,6 +3,7 @@ package com.example.autotests.popularmoviesapp;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         }
         if (isCursorOK){
             Gson gson = new Gson();
+            Log.i(getClass().getSimpleName(),mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
             movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
         } else {
             movieItem = mMovieData.get(position);

@@ -3,9 +3,13 @@ package com.example.autotests.popularmoviesapp;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -21,7 +25,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
-import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
 import com.example.autotests.popularmoviesapp.utils.MoviesJson;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
@@ -31,7 +34,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     RecyclerView mMoviesRecyclerView;
@@ -43,6 +46,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private static String mSortBy;
     public List<ResultsItem> mMoviesList;
     private SQLiteDatabase mDb;
+
+    private static final int ID_FAVORITES_LOADER = 40;
+    private static final int ID_TMDB_LOADER = 41;
 
     public static final String EXTRA_MOVIE = "Movie";
     public static final String MOVIES = "Movies";
@@ -74,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
             if (FAVORITES.equals(mSortBy)){
-                mAdapter.setFavoritesCursor(loadFavorites());
+                loadFavorites();
             }
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
@@ -112,19 +118,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         new RequestDataAsyncTask().execute(sortBy);
     }
-    private Cursor loadFavorites(){
-        FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(this);
-        mDb = dbHelper.getReadableDatabase();
-        Cursor cursor = mDb.query(
-                FavoritesEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                FavoritesEntry.COLUMN_TITLE
-        );
-        return cursor;
+    private void loadFavorites(){
+        getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -155,6 +150,32 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra(EXTRA_MOVIE, movieDetails);
         startActivity(intent);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        switch(id){
+            case ID_TMDB_LOADER:
+                break;
+            case ID_FAVORITES_LOADER:
+                Uri queryUri = FavoritesEntry.CONTENT_URI;
+                return new CursorLoader(this, queryUri, null, null, null, null);
+            default:
+                throw new RuntimeException("Loader not implemented: "+id);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            mAdapter.setFavoritesCursor(data);
+            getSupportLoaderManager()
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.setFavoritesCursor(null);
     }
 
 
@@ -231,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             case R.id.option_favorites:
                 if(!item.isChecked()){
                     item.setChecked(true);
-                    mAdapter.setFavoritesCursor(loadFavorites());
+                    loadFavorites();
                     mSortBy = FAVORITES;
                 }
                 return true;

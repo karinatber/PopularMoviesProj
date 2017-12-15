@@ -1,6 +1,5 @@
 package com.example.autotests.popularmoviesapp;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -84,7 +83,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         Uri uri = getContentResolver().insert(FavoriteMoviesContract.FavoritesEntry.CONTENT_URI, contentValues);
         if (uri != null) {
             Log.v(MainActivity.class.getSimpleName(), "Favorite added to database, Uri: " + uri);
-            Toast.makeText(this, mMovieDetails.getTitle()+"added to favorites", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, mMovieDetails.getTitle()+" added to favorites", Toast.LENGTH_LONG).show();
         }
     }
     public void isMovieFavorite(){
