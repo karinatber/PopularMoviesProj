@@ -24,6 +24,7 @@ import java.util.List;
  */
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
+    public static final String TAG = MoviesAdapter.class.getSimpleName();
     private List<ResultsItem> mMovieData;
     private Cursor mCursor;
     private final MoviesAdapterOnClickHandler mOnClickHandler;
@@ -32,8 +33,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         void onClick (ResultsItem movieDetails);
     }
 
-    public MoviesAdapter(MoviesAdapterOnClickHandler mOnClickHandler, Cursor cursor){
-        this.mCursor = cursor;
+    public MoviesAdapter(MoviesAdapterOnClickHandler mOnClickHandler){
         this.mOnClickHandler = mOnClickHandler;
     }
 
@@ -51,16 +51,19 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
+        Log.i(TAG, "onBindViewHolder was called.");
         ResultsItem movieItem;
         boolean isCursorOK = false;
         // Move the mCursor to the position of the item to be displayed
         if (mCursor != null){
             isCursorOK = mCursor.moveToPosition(position);
+            Log.i(TAG, "isCursorOK: "+isCursorOK);
         }
         if (isCursorOK){
             Gson gson = new Gson();
-            Log.i(getClass().getSimpleName(),mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
+            Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
             movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
+            Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
         } else {
             movieItem = mMovieData.get(position);
         }
@@ -105,5 +108,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     }
     public void setFavoritesCursor(Cursor cursor){
         this.mCursor = cursor;
+        notifyDataSetChanged();
     }
 }

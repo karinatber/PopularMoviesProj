@@ -2,7 +2,6 @@ package com.example.autotests.popularmoviesapp;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public MoviesAdapter mAdapter;
     private static String mSortBy;
     public List<ResultsItem> mMoviesList;
-    private SQLiteDatabase mDb;
+    public Cursor mFavCursor;
 
     private static final int ID_FAVORITES_LOADER = 40;
     private static final int ID_TMDB_LOADER = 41;
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
         GridLayoutManager manager;
 
-        mAdapter = new MoviesAdapter(this, null);
+        mAdapter = new MoviesAdapter(this);
         mSortBy = POPULARITY;
 
         if (savedInstanceState != null) {
@@ -80,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
             if (FAVORITES.equals(mSortBy)){
-                loadFavorites();
+                getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
+                mAdapter.setMovieData(null);
             }
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
@@ -116,10 +116,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         //mSortBy = sortBy;
         mLoadIndicator.setVisibility(View.VISIBLE);
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+        mAdapter.setFavoritesCursor(null);
         new RequestDataAsyncTask().execute(sortBy);
     }
     private void loadFavorites(){
+        showMoviesData();
         getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
+        mAdapter.setMovieData(null);
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -160,7 +163,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 break;
             case ID_FAVORITES_LOADER:
                 Uri queryUri = FavoritesEntry.CONTENT_URI;
-                return new CursorLoader(this, queryUri, null, null, null, null);
+                mLoadIndicator.setVisibility(View.VISIBLE);
+                mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+                String[] projection = {FavoritesEntry._ID, FavoritesEntry.COLUMN_TITLE};
+                return new CursorLoader(this, queryUri, projection, null, null, null);
             default:
                 throw new RuntimeException("Loader not implemented: "+id);
         }
@@ -169,8 +175,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            mAdapter.setFavoritesCursor(data);
-            getSupportLoaderManager()
+        showMoviesData();
+        mAdapter.setFavoritesCursor(data);
+        mFavCursor = data;
     }
 
     @Override
