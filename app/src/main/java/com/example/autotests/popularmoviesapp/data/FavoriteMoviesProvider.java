@@ -41,7 +41,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] strings, String s, String[] strings1, String s1) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String orderBy) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         int match = sUriMatcher.match(uri);
         Cursor returnCursor;
@@ -49,14 +49,27 @@ public class FavoriteMoviesProvider extends ContentProvider {
             case FAVORITES:
                 returnCursor = db.query(
                         FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
-                        strings,
-                        s,
-                        strings1,
+                        projection,
+                        selection,
+                        selectionArgs,
                         null,
                         null,
-                        s1
+                        orderBy
                 );
                 break;
+            case FAVORITES_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                String mSelection = "_id=?";
+                String[] mSelectionArgs = new String[]{id};
+                returnCursor = db.query(
+                        FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
+                        projection,
+                        mSelection,
+                        mSelectionArgs,
+                        null,
+                        null,
+                        orderBy
+                );
             default:
                 throw new UnsupportedOperationException("Unknown uri: "+uri);
         }
@@ -93,11 +106,61 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String s, String[] strings) {
-        return 0;
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        int rowsDeleted;
+        switch (match){
+            case FAVORITES:
+                if (null == s){
+                    s = "1";
+                    rowsDeleted = db.delete(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, s, strings);
+                    break;
+                }
+            case FAVORITES_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                String mSelection = "_id=?";
+                String[] mSelectionArgs = new String[]{id};
+                rowsDeleted = db.delete(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, mSelection, mSelectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri in delete method: "+uri);
+        }
+        if (rowsDeleted>0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
     }
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
         return 0;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        switch(match){
+            case FAVORITES:
+                db.beginTransaction();
+                int rowsInserted = 0;
+                try{
+                    for (ContentValues cv : values){
+                        long _rows = db.insert(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, null, cv);
+                        if (_rows != -1){
+                            rowsInserted++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally{
+                    db.endTransaction();
+                }
+                if (rowsInserted >0){
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return rowsInserted;
+            default:
+                return super.bulkInsert(uri, values);
+        }
     }
 }
