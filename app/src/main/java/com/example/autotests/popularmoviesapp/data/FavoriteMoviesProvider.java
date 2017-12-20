@@ -133,7 +133,21 @@ public class FavoriteMoviesProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        int rowsUpdated = 0;
+        switch (match){
+            case FAVORITES:
+                rowsUpdated = db.update(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, contentValues, s, strings);
+                break;
+            case FAVORITES_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                String mSelection = "_id=?";
+                String[] mSelectionArgs = new String[]{id};
+                rowsUpdated = db.update(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, contentValues, mSelection, mSelectionArgs);
+                break;
+        }
+        return rowsUpdated;
     }
 
     @Override

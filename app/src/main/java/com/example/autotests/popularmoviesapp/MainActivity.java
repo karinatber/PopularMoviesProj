@@ -1,5 +1,6 @@
 package com.example.autotests.popularmoviesapp;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
 import com.example.autotests.popularmoviesapp.utils.MoviesJson;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
@@ -205,6 +207,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 Gson gson = new Gson();
                 MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
                 List<ResultsItem> listOfMovies = jsonAsObject.getResults();
+
+                List<ContentValues> cvList = new ArrayList<>();
+                for (ResultsItem movieItem : listOfMovies){
+                    cvList.add(createMovieItem(movieItem));
+                }
+                getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[listOfMovies.size()]));
                 return listOfMovies;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -223,6 +231,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 mAdapter.setMovieData(listOfMovies);
                 mMoviesList = listOfMovies;
             }
+        }
+
+        public ContentValues createMovieItem(ResultsItem movieItem){
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(FavoritesEntry.COLUMN_TITLE, movieItem.toString());
+            contentValues.put(FavoritesEntry.COLUMN_DATE, movieItem.getReleaseDate());
+            if (POPULARITY.equals(mSortBy)){
+                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.POPULAR);
+            } else if (TOP_RATED.equals(mSortBy)){
+                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.TOP_RATED);
+            }
+            return contentValues;
         }
     }
 

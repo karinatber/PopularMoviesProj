@@ -52,7 +52,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
         Log.i(TAG, "onBindViewHolder was called.");
-        ResultsItem movieItem;
+        ResultsItem movieItem = null;
         boolean isCursorOK = false;
         // Move the mCursor to the position of the item to be displayed
         if (mCursor != null){
@@ -64,8 +64,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
             Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
             movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
             Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
-        } else {
-            movieItem = mMovieData.get(position);
+        }
+//        else {
+//            movieItem = mMovieData.get(position);
+//        }
+        if (movieItem == null){
+            return;
         }
         String title = movieItem.getTitle();
         holder.mMovieTextItem.setText(title);
@@ -77,8 +81,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     @Override
     public int getItemCount() {
-        if (null == mMovieData) return 0;
-        return mMovieData.size();
+        if (null == mCursor) return 0;
+//        return mMovieData.size();
+        return mCursor.getCount();
     }
 
     public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
