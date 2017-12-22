@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public MoviesAdapter mAdapter;
     private static String mSortBy;
     public List<ResultsItem> mMoviesList;
-    public Cursor mFavCursor;
+    public Cursor mCursor;
 
     private static final int ID_FAVORITES_LOADER = 40;
     private static final int ID_TMDB_LOADER = 41;
@@ -159,16 +159,41 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        mLoadIndicator.setVisibility(View.VISIBLE);
+        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
 
         switch(id){
             case ID_TMDB_LOADER:
+                if (mCursor == null){
+                    try {
+                        URL requestUrl = NetworkUtils.buildUrl(mSortBy);
+                        String resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
+                        Gson gson = new Gson();
+                        MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
+                        List<ResultsItem> listOfMovies = jsonAsObject.getResults();
+                        //add all the values to the database
+                        List<ContentValues> cvList = new ArrayList<>();
+                        for (ResultsItem movieItem : listOfMovies){
+                            ContentValues cvItem = createMovieItem(movieItem);
+                            if (cvItem != null){
+                                cvList.add(cvItem);
+                            }
+                        }
+                        getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[listOfMovies.size()]));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                    int label = mSortBy == POPULARITY ? FavoriteMoviesContract.POPULAR : FavoriteMoviesContract.TOP_RATED;
+                    String[] selectionArgs = new String[]{String.valueOf(label)};
+                    return new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL, selectionArgs, null);
+                }
+
                 break;
             case ID_FAVORITES_LOADER:
                 Uri queryUri = FavoritesEntry.CONTENT_URI;
-                mLoadIndicator.setVisibility(View.VISIBLE);
-                mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-                String[] projection = {FavoritesEntry._ID, FavoritesEntry.COLUMN_TITLE};
-                return new CursorLoader(this, queryUri, projection, null, null, null);
+                String[] selectionArgs = new String[]{String.valueOf(FavoriteMoviesContract.IS_FAVORITE)};
+                return new CursorLoader(this, queryUri, null, FavoritesEntry.COLUMN_IS_FAVORITE, selectionArgs, null);
             default:
                 throw new RuntimeException("Loader not implemented: "+id);
         }
@@ -179,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         showMoviesData();
         mAdapter.setFavoritesCursor(data);
-        mFavCursor = data;
+        mCursor = data;
     }
 
     @Override
@@ -187,6 +212,34 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mAdapter.setFavoritesCursor(null);
     }
 
+    public ContentValues createMovieItem(ResultsItem movieItem){
+        ContentValues contentValues = new ContentValues();
+        if(mCursor == null){
+            contentValues.put(FavoritesEntry.COLUMN_TITLE, movieItem.toString());
+            contentValues.put(FavoritesEntry.COLUMN_DATE, movieItem.getReleaseDate());
+            contentValues.put(FavoritesEntry.COLUMN_IS_FAVORITE, FavoriteMoviesContract.NOT_FAVORITE);
+            if (POPULARITY.equals(mSortBy)){
+                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.POPULAR);
+            } else if (TOP_RATED.equals(mSortBy)){
+                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.TOP_RATED);
+            }
+            return contentValues;
+        }
+        return null;
+    }
+
+    public boolean rowExists(ResultsItem movieItem){
+        String data = movieItem.toString();
+        String[] selectionArgs = new String[]{data};
+        Cursor movie = null;
+        try {
+            movie = getContentResolver().query(FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_TITLE, selectionArgs, null);
+        }
+        if (movie != null){
+            return true;
+        }
+        return false;
+    }
 
     public class RequestDataAsyncTask extends AsyncTask<String, Void, List<ResultsItem>> {
 
@@ -207,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 Gson gson = new Gson();
                 MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
                 List<ResultsItem> listOfMovies = jsonAsObject.getResults();
-
+                //add all the values to the database
                 List<ContentValues> cvList = new ArrayList<>();
                 for (ResultsItem movieItem : listOfMovies){
                     cvList.add(createMovieItem(movieItem));
@@ -233,18 +286,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             }
         }
 
-        public ContentValues createMovieItem(ResultsItem movieItem){
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(FavoritesEntry.COLUMN_TITLE, movieItem.toString());
-            contentValues.put(FavoritesEntry.COLUMN_DATE, movieItem.getReleaseDate());
-            if (POPULARITY.equals(mSortBy)){
-                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.POPULAR);
-            } else if (TOP_RATED.equals(mSortBy)){
-                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.TOP_RATED);
-            }
-            return contentValues;
-        }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
