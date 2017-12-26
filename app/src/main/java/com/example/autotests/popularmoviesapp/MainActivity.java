@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mAdapter = new MoviesAdapter(this);
         mSortBy = POPULARITY;
 
+
         if (savedInstanceState != null) {
             mMoviesList = savedInstanceState.getParcelableArrayList(MOVIES);
             mAdapter.setMovieData(mMoviesList);
@@ -82,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
             if (FAVORITES.equals(mSortBy)){
                 getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
-                mAdapter.setMovieData(null);
             }
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
@@ -115,16 +115,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private void loadTMDBData(String sortBy) {
         showMoviesData();
-        //mSortBy = sortBy;
+        mSortBy = sortBy;
         mLoadIndicator.setVisibility(View.VISIBLE);
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mAdapter.setFavoritesCursor(null);
-        new RequestDataAsyncTask().execute(sortBy);
+        Bundle args = new Bundle();
+        args.putString(SORT_BY, sortBy);
+        getSupportLoaderManager().initLoader(ID_TMDB_LOADER, args, this);
+        //new RequestDataAsyncTask().execute(sortBy);
     }
     private void loadFavorites(){
         showMoviesData();
         getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
-        mAdapter.setMovieData(null);
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -165,39 +166,45 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         switch(id){
             case ID_TMDB_LOADER:
                 if (mCursor == null){
+//                    getContentResolver().query()
+//                    if (){
                     try {
-                        URL requestUrl = NetworkUtils.buildUrl(mSortBy);
-                        String resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
-                        Gson gson = new Gson();
-                        MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
-                        List<ResultsItem> listOfMovies = jsonAsObject.getResults();
+                        if (args != null){
+                            String sortBy = args.getString(SORT_BY);
+                            new RequestDataAsyncTask().execute(sortBy);
+                        }
+                        //                        URL requestUrl = NetworkUtils.buildUrl(mSortBy);
+                        //                        String resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
+                        //                        Gson gson = new Gson();
+                        //                        MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
+                        //                        List<ResultsItem> listOfMovies = jsonAsObject.getResults();
                         //add all the values to the database
                         List<ContentValues> cvList = new ArrayList<>();
-                        for (ResultsItem movieItem : listOfMovies){
+                        for (ResultsItem movieItem : mMoviesList){
                             ContentValues cvItem = createMovieItem(movieItem);
                             if (cvItem != null){
                                 cvList.add(cvItem);
                             }
                         }
-                        getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[listOfMovies.size()]));
+                        getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[mMoviesList.size()]));
                     } catch (Exception e) {
                         e.printStackTrace();
                         return null;
                     }
-                    int label = mSortBy == POPULARITY ? FavoriteMoviesContract.POPULAR : FavoriteMoviesContract.TOP_RATED;
-                    String[] selectionArgs = new String[]{String.valueOf(label)};
-                    return new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL, selectionArgs, null);
+//                    CursorLoader returnLoader = new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
+//                    }
                 }
+                int label = mSortBy == POPULARITY ? FavoriteMoviesContract.POPULAR : FavoriteMoviesContract.TOP_RATED;
+                String[] selectionArgs = new String[]{String.valueOf(label)};
+                return new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
 
-                break;
             case ID_FAVORITES_LOADER:
                 Uri queryUri = FavoritesEntry.CONTENT_URI;
-                String[] selectionArgs = new String[]{String.valueOf(FavoriteMoviesContract.IS_FAVORITE)};
-                return new CursorLoader(this, queryUri, null, FavoritesEntry.COLUMN_IS_FAVORITE, selectionArgs, null);
+                String[] selectionArgsFav = new String[]{String.valueOf(FavoriteMoviesContract.IS_FAVORITE)};
+                return new CursorLoader(this, queryUri, null, FavoritesEntry.COLUMN_IS_FAVORITE+"=?", selectionArgsFav, null);
             default:
                 throw new RuntimeException("Loader not implemented: "+id);
         }
-        return null;
     }
 
     @Override
@@ -234,6 +241,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         Cursor movie = null;
         try {
             movie = getContentResolver().query(FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_TITLE, selectionArgs, null);
+        } catch (Exception e){
+            return false;
         }
         if (movie != null){
             return true;

@@ -11,7 +11,7 @@ import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.Favori
 
 public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "favorites.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     public FavoriteMoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
