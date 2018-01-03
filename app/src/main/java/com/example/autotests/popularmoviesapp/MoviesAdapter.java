@@ -52,25 +52,26 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
         Log.i(TAG, "onBindViewHolder was called.");
-        ResultsItem movieItem = null;
+        ResultsItem movieItem = mMovieData.get(position);
         boolean isCursorOK = false;
         // Move the mCursor to the position of the item to be displayed
-        if (mCursor != null){
-            isCursorOK = mCursor.moveToPosition(position);
-            Log.i(TAG, "isCursorOK: "+isCursorOK);
-        }
-        if (isCursorOK){
-            Gson gson = new Gson();
-            Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
-            movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
-            Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
-        }
+//        if (mCursor != null){
+//            isCursorOK = mCursor.moveToPosition(position);
+//            Log.i(TAG, "isCursorOK: "+isCursorOK);
+//        }
+//        if (isCursorOK){
+//            Gson gson = new Gson();
+//            Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
+//            movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
+//            Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
+//        }
 //        else {
 //            movieItem = mMovieData.get(position);
 //        }
-        if (movieItem == null){
-            return;
-        }
+//        if (movieItem == null){
+//            return;
+//        }
+
         String title = movieItem.getTitle();
         holder.mMovieTextItem.setText(title);
         URL imageUrlPath = NetworkUtils.buildImageUrl(movieItem.getPosterPath());

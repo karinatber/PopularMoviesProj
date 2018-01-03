@@ -116,12 +116,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private void loadTMDBData(String sortBy) {
         showMoviesData();
         mSortBy = sortBy;
-        mLoadIndicator.setVisibility(View.VISIBLE);
-        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        Bundle args = new Bundle();
-        args.putString(SORT_BY, sortBy);
-        getSupportLoaderManager().initLoader(ID_TMDB_LOADER, args, this);
-        //new RequestDataAsyncTask().execute(sortBy);
+//        mLoadIndicator.setVisibility(View.VISIBLE);
+//        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+//        Bundle args = new Bundle();
+//        args.putString(SORT_BY, sortBy);
+//        getSupportLoaderManager().initLoader(ID_TMDB_LOADER, args, this);
+        new RequestDataAsyncTask().execute(sortBy);
     }
     private void loadFavorites(){
         showMoviesData();
@@ -164,39 +164,39 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
 
         switch(id){
-            case ID_TMDB_LOADER:
-                if (mCursor == null){
-//                    getContentResolver().query()
-//                    if (){
-                    try {
-                        if (args != null){
-                            String sortBy = args.getString(SORT_BY);
-                            new RequestDataAsyncTask().execute(sortBy);
-                        }
-                        //                        URL requestUrl = NetworkUtils.buildUrl(mSortBy);
-                        //                        String resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
-                        //                        Gson gson = new Gson();
-                        //                        MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
-                        //                        List<ResultsItem> listOfMovies = jsonAsObject.getResults();
-                        //add all the values to the database
-                        List<ContentValues> cvList = new ArrayList<>();
-                        for (ResultsItem movieItem : mMoviesList){
-                            ContentValues cvItem = createMovieItem(movieItem);
-                            if (cvItem != null){
-                                cvList.add(cvItem);
-                            }
-                        }
-                        getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[mMoviesList.size()]));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-//                    CursorLoader returnLoader = new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
+//            case ID_TMDB_LOADER:
+//                if (mCursor == null){
+////                    getContentResolver().query()
+////                    if (){
+//                    try {
+//                        if (args != null){
+//                            String sortBy = args.getString(SORT_BY);
+//                            new RequestDataAsyncTask().execute(sortBy);
+//                        }
+//                        //                        URL requestUrl = NetworkUtils.buildUrl(mSortBy);
+//                        //                        String resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
+//                        //                        Gson gson = new Gson();
+//                        //                        MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
+//                        //                        List<ResultsItem> listOfMovies = jsonAsObject.getResults();
+//                        //add all the values to the database
+//                        List<ContentValues> cvList = new ArrayList<>();
+//                        for (ResultsItem movieItem : mMoviesList){
+//                            ContentValues cvItem = createMovieItem(movieItem);
+//                            if (cvItem != null){
+//                                cvList.add(cvItem);
+//                            }
+//                        }
+//                        getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[mMoviesList.size()]));
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        return null;
 //                    }
-                }
-                int label = mSortBy == POPULARITY ? FavoriteMoviesContract.POPULAR : FavoriteMoviesContract.TOP_RATED;
-                String[] selectionArgs = new String[]{String.valueOf(label)};
-                return new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
+////                    CursorLoader returnLoader = new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
+////                    }
+//                }
+//                int label = mSortBy == POPULARITY ? FavoriteMoviesContract.POPULAR : FavoriteMoviesContract.TOP_RATED;
+//                String[] selectionArgs = new String[]{String.valueOf(label)};
+//                return new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
 
             case ID_FAVORITES_LOADER:
                 Uri queryUri = FavoritesEntry.CONTENT_URI;
@@ -210,8 +210,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         showMoviesData();
-        mAdapter.setFavoritesCursor(data);
-        mCursor = data;
+        List<ResultsItem> favoritesList = new ArrayList<>();
+        while (data.moveToNext()){
+            Gson gson = new Gson();
+            Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
+            ResultsItem movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
+            Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
+            favoritesList.add(movieItem);
+        }
+        mMoviesList = favoritesList;
+        mAdapter.setMovieData(favoritesList);
+//        mAdapter.setFavoritesCursor(data);
+//        mCursor = data;
     }
 
     @Override
@@ -270,11 +280,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
                 List<ResultsItem> listOfMovies = jsonAsObject.getResults();
                 //add all the values to the database
-                List<ContentValues> cvList = new ArrayList<>();
-                for (ResultsItem movieItem : listOfMovies){
-                    cvList.add(createMovieItem(movieItem));
-                }
-                getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[listOfMovies.size()]));
+//                List<ContentValues> cvList = new ArrayList<>();
+//                for (ResultsItem movieItem : listOfMovies){
+//                    cvList.add(createMovieItem(movieItem));
+//                }
+//                getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[listOfMovies.size()]));
                 return listOfMovies;
             } catch (Exception e) {
                 e.printStackTrace();
