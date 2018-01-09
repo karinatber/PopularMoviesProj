@@ -223,18 +223,18 @@ public class ResultsItem implements Parcelable{
 	@Override
 	public String toString() {
 		return  "{\"overview\":\"" + overview + "\","+
-                "\"originalTitle\":\"" + originalTitle + "\"," +
-                "\"originalLanguage\":\"" + originalLanguage + "\"," +
+                "\"original_title\":\"" + originalTitle + "\"," +
+                "\"original_language\":\"" + originalLanguage + "\"," +
                 "\"video\": " + video + "," +
                 "\"title\":\"" + title + "\"," +
-                "\"genreIds\": " + genreIds + "," +
-                "\"posterPath\":\"" + posterPath + "\"," +
-                "\"backdropPath\":\"" + backdropPath + "\"," +
-                "\"releaseDate\":\"" + releaseDate + "\"," +
-                "\"voteAverage\": " + voteAverage + "," +
+                "\"genre_ids\": " + genreIds + "," +
+                "\"poster_path\":\"" + posterPath + "\"," +
+                "\"backdrop_path\":\"" + backdropPath + "\"," +
+                "\"release_date\":\"" + releaseDate + "\"," +
+                "\"vote_average\": " + voteAverage + "," +
                 "\"popularity\": " + popularity + "," +
                 "\"id\": " + id + "," +
                 "\"adult\": " + adult + "," +
-                "\"voteCount\": " + voteCount + "}";
+                "\"vote_count\": " + voteCount + "}";
 	}
 }

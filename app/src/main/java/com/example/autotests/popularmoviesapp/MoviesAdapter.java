@@ -10,10 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -82,9 +80,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     @Override
     public int getItemCount() {
-        if (null == mCursor) return 0;
-//        return mMovieData.size();
-        return mCursor.getCount();
+        if (mMovieData != null)
+            return mMovieData.size();
+        return 0;
     }
 
     public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{

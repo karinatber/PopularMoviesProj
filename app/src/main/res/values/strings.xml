@@ -10,4 +10,5 @@
     <string name="ok">OK</string>
     <string name="add_to_favorite">Add to Favorites</string>
     <string name="favorites">Favorites</string>
+    <string name="no_favorites_message">There are no Favorite Movies yet.</string>
 </resources>

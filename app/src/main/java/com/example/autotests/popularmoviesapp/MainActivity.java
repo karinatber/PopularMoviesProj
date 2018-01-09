@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     RecyclerView mMoviesRecyclerView;
     TextView mErrorMsgDisplay;
+    TextView mNoFavesMsgDisplay;
     ProgressBar mLoadIndicator;
     SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView = (RecyclerView)findViewById(R.id.rv_movies_list);
         mErrorMsgDisplay = (TextView)findViewById(R.id.tv_error_message);
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
+        mNoFavesMsgDisplay = (TextView)findViewById(R.id.tv_no_favorites_message);
         GridLayoutManager manager;
 
         mAdapter = new MoviesAdapter(this);
@@ -127,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         showMoviesData();
         getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.i(TAG,"onSaveInstanceState was called");
@@ -143,12 +146,21 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void showErrorMsg() {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMsgDisplay.setVisibility(View.VISIBLE);
+        mNoFavesMsgDisplay.setVisibility(View.INVISIBLE);
     }
 
     /* make recycler view with movies list visible */
     public void showMoviesData() {
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
         mErrorMsgDisplay.setVisibility(View.INVISIBLE);
+        mNoFavesMsgDisplay.setVisibility(View.INVISIBLE);
+    }
+
+    /* make no favorites message visible */
+    public void showNoFavoritesMsg(){
+        mNoFavesMsgDisplay.setVisibility(View.VISIBLE);
+        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMsgDisplay.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -200,8 +212,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
             case ID_FAVORITES_LOADER:
                 Uri queryUri = FavoritesEntry.CONTENT_URI;
-                String[] selectionArgsFav = new String[]{String.valueOf(FavoriteMoviesContract.IS_FAVORITE)};
-                return new CursorLoader(this, queryUri, null, FavoritesEntry.COLUMN_IS_FAVORITE+"=?", selectionArgsFav, null);
+                return new CursorLoader(this, queryUri, null, null, null, null);
             default:
                 throw new RuntimeException("Loader not implemented: "+id);
         }
@@ -209,15 +220,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        showMoviesData();
+        mLoadIndicator.setVisibility(View.INVISIBLE);
         List<ResultsItem> favoritesList = new ArrayList<>();
         while (data.moveToNext()){
             Gson gson = new Gson();
-            Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
-            ResultsItem movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
+            ResultsItem movieItem = gson.fromJson(data.getString(data.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
             Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
             favoritesList.add(movieItem);
         }
+        if (favoritesList.isEmpty()){
+            showNoFavoritesMsg();
+            return;
+        }
+        showMoviesData();
         mMoviesList = favoritesList;
         mAdapter.setMovieData(favoritesList);
 //        mAdapter.setFavoritesCursor(data);
@@ -234,12 +249,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         if(mCursor == null){
             contentValues.put(FavoritesEntry.COLUMN_TITLE, movieItem.toString());
             contentValues.put(FavoritesEntry.COLUMN_DATE, movieItem.getReleaseDate());
-            contentValues.put(FavoritesEntry.COLUMN_IS_FAVORITE, FavoriteMoviesContract.NOT_FAVORITE);
-            if (POPULARITY.equals(mSortBy)){
-                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.POPULAR);
-            } else if (TOP_RATED.equals(mSortBy)){
-                contentValues.put(FavoritesEntry.COLUMN_LABEL, FavoriteMoviesContract.TOP_RATED);
-            }
             return contentValues;
         }
         return null;
