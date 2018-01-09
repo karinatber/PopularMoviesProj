@@ -107,7 +107,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadTMDBData(mSortBy);
+                if (!FAVORITES.equals(mSortBy)) {
+                    loadTMDBData(mSortBy);
+                } else {
+                    loadFavorites();
+                }
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -241,7 +245,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.v(TAG, "onLoaderReset was called");
         mAdapter.setFavoritesCursor(null);
+        mAdapter.setMovieData(null);
     }
 
     public ContentValues createMovieItem(ResultsItem movieItem){

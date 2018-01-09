@@ -111,11 +111,8 @@ public class FavoriteMoviesProvider extends ContentProvider {
         int rowsDeleted;
         switch (match){
             case FAVORITES:
-                if (null == s){
-                    s = "1";
-                    rowsDeleted = db.delete(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, s, strings);
-                    break;
-                }
+                rowsDeleted = db.delete(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, s, strings);
+                break;
             case FAVORITES_WITH_ID:
                 String id = uri.getPathSegments().get(1);
                 String mSelection = "_id=?";

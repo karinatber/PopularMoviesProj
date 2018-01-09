@@ -2,6 +2,7 @@ package com.example.autotests.popularmoviesapp;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,11 +33,15 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     public Button mBtnAddFav;
     SQLiteDatabase mDb;
     ResultsItem mMovieDetails;
+    private boolean isFavorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
+
+        Intent intent = getIntent();
+        mMovieDetails = intent.getParcelableExtra(MainActivity.EXTRA_MOVIE);
 
         mMoviePoster = (ImageView) findViewById(R.id.iv_movie_detail_poster);
         mMovieTitle = (TextView) findViewById(R.id.tv_movies_detail_title);
@@ -45,13 +50,18 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         mRatingMovie = (RatingBar)findViewById(R.id.rtb_movie_rating);
         mBtnAddFav = (Button) findViewById(R.id.bt_movie_details_add_fav);
 
-        Intent intent = getIntent();
-        mMovieDetails = intent.getParcelableExtra(MainActivity.EXTRA_MOVIE);
+        isFavorite = false;
+        isMovieFavorite();
+
         mMovieTitle.setText(mMovieDetails.getTitle());
         mMovieOverview.setText(mMovieDetails.getOverview());
         String editedDate = formatDate(mMovieDetails.getReleaseDate());
         mReleaseDate.setText(editedDate);
         mRatingMovie.setRating(mMovieDetails.getVoteAverage()/2);
+        if(isFavorite){
+            mBtnAddFav.setText(getString(R.string.remove_favorite));
+            mBtnAddFav.setPressed(true);
+        }
         mBtnAddFav.setOnClickListener(this);
 
         URL posterUrl = NetworkUtils.buildImageUrl(mMovieDetails.getPosterPath());
@@ -72,7 +82,18 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         int id = view.getId();
         switch (id){
             case R.id.bt_movie_details_add_fav:
-                addNewFavorite();
+                if (isFavorite) {
+                    removeFavorite();
+                    isFavorite = false;
+                    mBtnAddFav.setPressed(false);
+                    mBtnAddFav.setText(getString(R.string.add_to_favorite));
+                }
+                else {
+                    addNewFavorite();
+                    isFavorite = true;
+                    mBtnAddFav.setPressed(true);
+                    mBtnAddFav.setText(getString(R.string.remove_favorite));
+                }
                 break;
         }
     }
@@ -86,7 +107,19 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
             Toast.makeText(this, mMovieDetails.getTitle()+" added to favorites", Toast.LENGTH_LONG).show();
         }
     }
+    private void removeFavorite(){
+        Uri queryUri = FavoriteMoviesContract.FavoritesEntry.CONTENT_URI;
+        String where = FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE+"=?";
+        String[] selectionArgs = new String[]{mMovieDetails.toString()};
+        getContentResolver().delete(queryUri, where, selectionArgs);
+    }
     public void isMovieFavorite(){
-
+        Uri queryUri = FavoriteMoviesContract.FavoritesEntry.CONTENT_URI;
+        String selection = FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE+"=?";
+        String[] selesctionArgs = new String[]{mMovieDetails.toString()};
+        Cursor cursor = getContentResolver().query(queryUri, null, selection, selesctionArgs, null);
+        if ((cursor != null)&& (cursor.moveToFirst())){
+            isFavorite = true;
+        }
     }
 }
