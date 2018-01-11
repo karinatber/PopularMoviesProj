@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,25 +18,40 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.autotests.popularmoviesapp.adapter.TrailersAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
+import com.example.autotests.popularmoviesapp.utils.reviews.ReviewsResultsItem;
+import com.example.autotests.popularmoviesapp.utils.videos.TrailersJson;
+import com.example.autotests.popularmoviesapp.utils.videos.VideoResultsItem;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 
-public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener{
+public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener, TrailersAdapter.TrailerClickHandler{
     public static final String TAG = MovieDetailActivity.class.getSimpleName();
+    public static final String VIDEO = "videos";
+    public static final String REVIEW = "review";
+
     public ImageView mMoviePoster;
     public TextView mMovieTitle;
     public TextView mMovieOverview;
     public TextView mReleaseDate;
     public RatingBar mRatingMovie;
     public Button mBtnAddFav;
+    public RecyclerView mTrailerRecyclerView;
+
     SQLiteDatabase mDb;
     ResultsItem mMovieDetails;
+    VideoResultsItem mTrailersList;
+    ReviewsResultsItem mReviewsList;
     private boolean isFavorite;
+    TrailersAdapter mTrailersAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +67,8 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         mReleaseDate = (TextView)findViewById(R.id.tv_release_date);
         mRatingMovie = (RatingBar)findViewById(R.id.rtb_movie_rating);
         mBtnAddFav = (Button) findViewById(R.id.bt_movie_details_add_fav);
+        mTrailerRecyclerView = (RecyclerView)findViewById(R.id.rv_trailer_list);
+        mTrailersAdapter = new TrailersAdapter(this);
 
         isFavorite = false;
         isMovieFavorite();
@@ -64,8 +84,13 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         }
         mBtnAddFav.setOnClickListener(this);
 
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+
         URL posterUrl = NetworkUtils.buildImageUrl(mMovieDetails.getPosterPath());
         Picasso.with(this).load(posterUrl.toString()).fit().into(mMoviePoster);
+
+        mTrailerRecyclerView.setLayoutManager(manager);
+        mTrailerRecyclerView.setAdapter(mTrailersAdapter);
     }
 
     public String formatDate(String originalDate){
@@ -120,6 +145,42 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         Cursor cursor = getContentResolver().query(queryUri, null, selection, selesctionArgs, null);
         if ((cursor != null)&& (cursor.moveToFirst())){
             isFavorite = true;
+        }
+    }
+
+    /**TrailerClickHandler onClick method**/
+    @Override
+    public void onClick(VideoResultsItem trailer) {
+        String youtubeAuthority = "com.google.android.youtube";
+    }
+
+    public class RequestVideoAndReviewAsyncTask extends AsyncTask<String, Void, HashMap<String,List<Object>>>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected HashMap<String, List<Object>> doInBackground(String... strings) {
+            HashMap<String, List<Object>> results = new HashMap<>();
+            try{
+                int id = mMovieDetails.getId();
+                Gson gson = new Gson();
+                String videoJson = NetworkUtils.getResponseFromHttpUrl(NetworkUtils.buildExtraURL(id, VIDEO));
+
+                List<VideoResultsItem> trailers = gson.fromJson(videoJson, TrailersJson.class).getResults();
+
+                return results;
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(HashMap<String, List<Object>> videosAndReviews) {
+            super.onPostExecute(videosAndReviews);
         }
     }
 }

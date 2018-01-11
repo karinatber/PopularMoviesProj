@@ -1,6 +1,5 @@
 package com.example.autotests.popularmoviesapp;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,6 +23,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.adapter.MoviesAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
 import com.example.autotests.popularmoviesapp.utils.MoviesJson;
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     TextView mNoFavesMsgDisplay;
     ProgressBar mLoadIndicator;
     SwipeRefreshLayout mSwipeRefreshLayout;
+    LoaderManager mLoaderManager;
 
     public MoviesAdapter mAdapter;
     private static String mSortBy;
@@ -72,7 +73,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mErrorMsgDisplay = (TextView)findViewById(R.id.tv_error_message);
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
         mNoFavesMsgDisplay = (TextView)findViewById(R.id.tv_no_favorites_message);
+        mLoaderManager = getSupportLoaderManager();
         GridLayoutManager manager;
+
 
         mAdapter = new MoviesAdapter(this);
         mSortBy = POPULARITY;
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
             if (FAVORITES.equals(mSortBy)){
-                getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
+                mLoaderManager.initLoader(ID_FAVORITES_LOADER, null, this);
             }
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
@@ -131,7 +134,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
     private void loadFavorites(){
         showMoviesData();
-        getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
+        if(!mLoaderManager.hasRunningLoaders()){
+            mLoaderManager.initLoader(ID_FAVORITES_LOADER, null, this);
+        } else {
+            mLoaderManager.restartLoader(ID_FAVORITES_LOADER, null, this);
+        }
     }
 
     @Override
@@ -164,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void showNoFavoritesMsg(){
         mNoFavesMsgDisplay.setVisibility(View.VISIBLE);
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-        mErrorMsgDisplay.setVisibility(View.VISIBLE);
+        mErrorMsgDisplay.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -180,40 +187,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
 
         switch(id){
-//            case ID_TMDB_LOADER:
-//                if (mCursor == null){
-////                    getContentResolver().query()
-////                    if (){
-//                    try {
-//                        if (args != null){
-//                            String sortBy = args.getString(SORT_BY);
-//                            new RequestDataAsyncTask().execute(sortBy);
-//                        }
-//                        //                        URL requestUrl = NetworkUtils.buildUrl(mSortBy);
-//                        //                        String resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
-//                        //                        Gson gson = new Gson();
-//                        //                        MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
-//                        //                        List<ResultsItem> listOfMovies = jsonAsObject.getResults();
-//                        //add all the values to the database
-//                        List<ContentValues> cvList = new ArrayList<>();
-//                        for (ResultsItem movieItem : mMoviesList){
-//                            ContentValues cvItem = createMovieItem(movieItem);
-//                            if (cvItem != null){
-//                                cvList.add(cvItem);
-//                            }
-//                        }
-//                        getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[mMoviesList.size()]));
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        return null;
-//                    }
-////                    CursorLoader returnLoader = new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
-////                    }
-//                }
-//                int label = mSortBy == POPULARITY ? FavoriteMoviesContract.POPULAR : FavoriteMoviesContract.TOP_RATED;
-//                String[] selectionArgs = new String[]{String.valueOf(label)};
-//                return new CursorLoader(this, FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_LABEL+"=?", selectionArgs, null);
-
             case ID_FAVORITES_LOADER:
                 Uri queryUri = FavoritesEntry.CONTENT_URI;
                 return new CursorLoader(this, queryUri, null, null, null, null);
@@ -250,30 +223,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mAdapter.setMovieData(null);
     }
 
-    public ContentValues createMovieItem(ResultsItem movieItem){
-        ContentValues contentValues = new ContentValues();
-        if(mCursor == null){
-            contentValues.put(FavoritesEntry.COLUMN_TITLE, movieItem.toString());
-            contentValues.put(FavoritesEntry.COLUMN_DATE, movieItem.getReleaseDate());
-            return contentValues;
-        }
-        return null;
-    }
 
-    public boolean rowExists(ResultsItem movieItem){
-        String data = movieItem.toString();
-        String[] selectionArgs = new String[]{data};
-        Cursor movie = null;
-        try {
-            movie = getContentResolver().query(FavoritesEntry.CONTENT_URI, null, FavoritesEntry.COLUMN_TITLE, selectionArgs, null);
-        } catch (Exception e){
-            return false;
-        }
-        if (movie != null){
-            return true;
-        }
-        return false;
-    }
 
     public class RequestDataAsyncTask extends AsyncTask<String, Void, List<ResultsItem>> {
 

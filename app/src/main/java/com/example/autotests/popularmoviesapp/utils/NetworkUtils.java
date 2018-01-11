@@ -69,4 +69,19 @@ public class NetworkUtils {
             return null;
         }
     }
+
+    public static URL buildExtraURL(int id, String type){
+        Uri videoUri = Uri.parse(BASE_URL+id+"/"+type)
+                .buildUpon()
+                .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .build();
+        try{
+            URL videoUrl = new URL(videoUri.toString());
+            Log.d(TAG, "Built videoUrl: "+videoUrl);
+            return videoUrl;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

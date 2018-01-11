@@ -57,5 +57,6 @@
                 android:layout_below="@id/tv_release_date"
                 android:id="@+id/tv_movie_detail_overview"/>
         </RelativeLayout>
+        <include layout="@layout/trailers_list"/>
     </LinearLayout>
 </ScrollView>

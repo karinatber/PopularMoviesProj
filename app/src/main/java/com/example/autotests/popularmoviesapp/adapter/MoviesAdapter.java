@@ -1,4 +1,4 @@
-package com.example.autotests.popularmoviesapp;
+package com.example.autotests.popularmoviesapp.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.R;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.squareup.picasso.Picasso;
@@ -51,24 +52,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
         Log.i(TAG, "onBindViewHolder was called.");
         ResultsItem movieItem = mMovieData.get(position);
-        boolean isCursorOK = false;
-        // Move the mCursor to the position of the item to be displayed
-//        if (mCursor != null){
-//            isCursorOK = mCursor.moveToPosition(position);
-//            Log.i(TAG, "isCursorOK: "+isCursorOK);
-//        }
-//        if (isCursorOK){
-//            Gson gson = new Gson();
-//            Log.i(TAG,mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)) );
-//            movieItem = gson.fromJson(mCursor.getString(mCursor.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
-//            Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
-//        }
-//        else {
-//            movieItem = mMovieData.get(position);
-//        }
-//        if (movieItem == null){
-//            return;
-//        }
 
         String title = movieItem.getTitle();
         holder.mMovieTextItem.setText(title);
@@ -85,7 +68,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         return 0;
     }
 
-    public class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public final TextView mMovieTextItem;
         public final ImageView mMovieImage;
         public final Context context;

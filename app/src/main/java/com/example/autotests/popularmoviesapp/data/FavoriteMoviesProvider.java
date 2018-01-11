@@ -101,6 +101,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
+        db.close();
         return returnUri;
     }
 
@@ -125,6 +126,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
         if (rowsDeleted>0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
+        db.close();
         return rowsDeleted;
     }
 
@@ -144,6 +146,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
                 rowsUpdated = db.update(FavoriteMoviesContract.FavoritesEntry.TABLE_NAME, contentValues, mSelection, mSelectionArgs);
                 break;
         }
+        db.close();
         return rowsUpdated;
     }
 
@@ -169,6 +172,7 @@ public class FavoriteMoviesProvider extends ContentProvider {
                 if (rowsInserted >0){
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
+                db.close();
                 return rowsInserted;
             default:
                 return super.bulkInsert(uri, values);
