@@ -77,7 +77,7 @@ public class NetworkUtils {
                 .build();
         try{
             URL videoUrl = new URL(videoUri.toString());
-            Log.d(TAG, "Built videoUrl: "+videoUrl);
+            Log.d(TAG, "Built extraUrl: "+videoUrl);
             return videoUrl;
         } catch (MalformedURLException e) {
             e.printStackTrace();

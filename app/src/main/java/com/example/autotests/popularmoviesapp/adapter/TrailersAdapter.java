@@ -73,5 +73,6 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
 
     public void setTrailersList(List<VideoResultsItem> trailersList){
         this.mTrailersList = trailersList;
+        notifyDataSetChanged();
     }
 }

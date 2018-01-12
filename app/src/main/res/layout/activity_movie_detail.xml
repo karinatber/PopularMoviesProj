@@ -57,6 +57,26 @@
                 android:layout_below="@id/tv_release_date"
                 android:id="@+id/tv_movie_detail_overview"/>
         </RelativeLayout>
-        <include layout="@layout/trailers_list"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:text="@string/trailers"
+            android:id="@+id/tv_trailer_label"
+            android:padding="16dp"/>
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rv_trailer_list"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_reviews_label"
+            android:text="@string/review"/>
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rv_review_list">
+
+        </android.support.v7.widget.RecyclerView>
     </LinearLayout>
 </ScrollView>

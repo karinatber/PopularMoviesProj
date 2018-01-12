@@ -13,4 +13,5 @@
     <string name="no_favorites_message">There are no Favorite Movies yet.</string>
     <string name="remove_favorite">Remove Favorite</string>
     <string name="trailers">Trailers</string>
+    <string name="review">Reviews</string>
 </resources>

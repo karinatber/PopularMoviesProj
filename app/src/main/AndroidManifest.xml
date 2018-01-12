@@ -21,6 +21,8 @@
 
         <activity android:name=".MovieDetailActivity"
             android:parentActivityName=".MainActivity"/>
+        <service android:name=".sync.RequestDataIntentService"
+            android:exported="false"/>
         <provider
             android:authorities="com.example.autotests.popularmoviesapp"
             android:name=".data.FavoriteMoviesProvider"

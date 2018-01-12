@@ -1,11 +1,13 @@
 package com.example.autotests.popularmoviesapp;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,25 +20,25 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.autotests.popularmoviesapp.adapter.ReviewsAdapter;
 import com.example.autotests.popularmoviesapp.adapter.TrailersAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
+import com.example.autotests.popularmoviesapp.sync.RequestDataIntentService;
+import com.example.autotests.popularmoviesapp.sync.RequestDataTasks;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.example.autotests.popularmoviesapp.utils.reviews.ReviewsResultsItem;
-import com.example.autotests.popularmoviesapp.utils.videos.TrailersJson;
 import com.example.autotests.popularmoviesapp.utils.videos.VideoResultsItem;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 
 public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener, TrailersAdapter.TrailerClickHandler{
     public static final String TAG = MovieDetailActivity.class.getSimpleName();
     public static final String VIDEO = "videos";
-    public static final String REVIEW = "review";
+    public static final String REVIEW = "reviews";
 
     public ImageView mMoviePoster;
     public TextView mMovieTitle;
@@ -45,6 +47,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     public RatingBar mRatingMovie;
     public Button mBtnAddFav;
     public RecyclerView mTrailerRecyclerView;
+    public RecyclerView mReviewRecyclerView;
 
     SQLiteDatabase mDb;
     ResultsItem mMovieDetails;
@@ -52,6 +55,9 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     ReviewsResultsItem mReviewsList;
     private boolean isFavorite;
     TrailersAdapter mTrailersAdapter;
+    ReviewsAdapter mReviewsAdapter;
+    RequestDataReceiver mReceiver;
+    IntentFilter mRequestFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +74,19 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         mRatingMovie = (RatingBar)findViewById(R.id.rtb_movie_rating);
         mBtnAddFav = (Button) findViewById(R.id.bt_movie_details_add_fav);
         mTrailerRecyclerView = (RecyclerView)findViewById(R.id.rv_trailer_list);
+        mReviewRecyclerView = (RecyclerView) findViewById(R.id.rv_review_list);
+
         mTrailersAdapter = new TrailersAdapter(this);
+        mReviewsAdapter = new ReviewsAdapter();
 
         isFavorite = false;
         isMovieFavorite();
+
+        mRequestFilter = new IntentFilter();
+        mReceiver = new RequestDataReceiver();
+
+        mRequestFilter.addAction(RequestDataTasks.ACTION_REQUESTS_FINISHED);
+
 
         mMovieTitle.setText(mMovieDetails.getTitle());
         mMovieOverview.setText(mMovieDetails.getOverview());
@@ -85,9 +100,17 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         mBtnAddFav.setOnClickListener(this);
 
         LinearLayoutManager manager = new LinearLayoutManager(this);
+        LinearLayoutManager managerReview = new LinearLayoutManager(this);
+
 
         URL posterUrl = NetworkUtils.buildImageUrl(mMovieDetails.getPosterPath());
         Picasso.with(this).load(posterUrl.toString()).fit().into(mMoviePoster);
+
+        loadTrailers();
+        loadReviews();
+
+        mReviewRecyclerView.setLayoutManager(managerReview);
+        mReviewRecyclerView.setAdapter(mReviewsAdapter);
 
         mTrailerRecyclerView.setLayoutManager(manager);
         mTrailerRecyclerView.setAdapter(mTrailersAdapter);
@@ -98,6 +121,18 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         String editedDate="";
         editedDate = list[1]+"/"+list[2]+"/"+list[0];
         return editedDate;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mReceiver, mRequestFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -148,39 +183,44 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    public void loadTrailers(){
+        Intent intent = new Intent(this, RequestDataIntentService.class);
+        intent.setAction(RequestDataTasks.ACTION_REQUEST_TRAILERS);
+        intent.putExtra(RequestDataTasks.MOVIE_ID, mMovieDetails.getId());
+        startService(intent);
+    }
+
+    public void loadReviews(){
+        Intent intent = new Intent(this, RequestDataIntentService.class);
+        intent.setAction(RequestDataTasks.ACTION_REQUEST_REVIEWS);
+        intent.putExtra(RequestDataTasks.MOVIE_ID, mMovieDetails.getId());
+        startService(intent);
+    }
+    public void updateTrailer(){
+        List<VideoResultsItem> trailerList = RequestDataTasks.getTrailersList();
+        List<ReviewsResultsItem> reviewList = RequestDataTasks.getReviewsList();
+        if (trailerList != null){
+            mTrailersAdapter.setTrailersList(trailerList);
+            mTrailerRecyclerView.setVisibility(View.VISIBLE);
+        }
+        if (reviewList != null){
+            mReviewsAdapter.setReviewData(reviewList);
+            mReviewRecyclerView.setAdapter(mReviewsAdapter);
+        }
+    }
+
     /**TrailerClickHandler onClick method**/
     @Override
     public void onClick(VideoResultsItem trailer) {
         String youtubeAuthority = "com.google.android.youtube";
     }
 
-    public class RequestVideoAndReviewAsyncTask extends AsyncTask<String, Void, HashMap<String,List<Object>>>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
+
+    private class RequestDataReceiver extends BroadcastReceiver{
 
         @Override
-        protected HashMap<String, List<Object>> doInBackground(String... strings) {
-            HashMap<String, List<Object>> results = new HashMap<>();
-            try{
-                int id = mMovieDetails.getId();
-                Gson gson = new Gson();
-                String videoJson = NetworkUtils.getResponseFromHttpUrl(NetworkUtils.buildExtraURL(id, VIDEO));
-
-                List<VideoResultsItem> trailers = gson.fromJson(videoJson, TrailersJson.class).getResults();
-
-                return results;
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(HashMap<String, List<Object>> videosAndReviews) {
-            super.onPostExecute(videosAndReviews);
+        public void onReceive(Context context, Intent intent) {
+            updateTrailer();
         }
     }
 }
