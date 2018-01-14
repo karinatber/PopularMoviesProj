@@ -269,9 +269,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-        if (mSortBy == TOP_RATED){
-            menu.getItem(0).setChecked(false);
-
+        if (TOP_RATED.equals(mSortBy)){
+            menu.getItem(1).setChecked(true);
+        } else if (FAVORITES.equals(mSortBy)){
+            menu.getItem(0).setChecked(true);
         }
         return true;
     }
