@@ -110,6 +110,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         loadReviews();
 
         mReviewRecyclerView.setLayoutManager(managerReview);
+        mReviewRecyclerView.setHasFixedSize(true);
         mReviewRecyclerView.setAdapter(mReviewsAdapter);
 
         mTrailerRecyclerView.setLayoutManager(manager);
@@ -157,6 +158,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
                 break;
         }
     }
+
     private void addNewFavorite() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE, mMovieDetails.toString());
@@ -167,17 +169,19 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
             Toast.makeText(this, mMovieDetails.getTitle()+" added to favorites", Toast.LENGTH_LONG).show();
         }
     }
+
     private void removeFavorite(){
         Uri queryUri = FavoriteMoviesContract.FavoritesEntry.CONTENT_URI;
         String where = FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE+"=?";
         String[] selectionArgs = new String[]{mMovieDetails.toString()};
         getContentResolver().delete(queryUri, where, selectionArgs);
     }
+
     public void isMovieFavorite(){
         Uri queryUri = FavoriteMoviesContract.FavoritesEntry.CONTENT_URI;
         String selection = FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE+"=?";
-        String[] selesctionArgs = new String[]{mMovieDetails.toString()};
-        Cursor cursor = getContentResolver().query(queryUri, null, selection, selesctionArgs, null);
+        String[] selectionArgs = new String[]{mMovieDetails.toString()};
+        Cursor cursor = getContentResolver().query(queryUri, null, selection, selectionArgs, null);
         if ((cursor != null)&& (cursor.moveToFirst())){
             isFavorite = true;
         }
@@ -196,7 +200,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         intent.putExtra(RequestDataTasks.MOVIE_ID, mMovieDetails.getId());
         startService(intent);
     }
-    public void updateTrailer(){
+    public void updateContent(){
         List<VideoResultsItem> trailerList = RequestDataTasks.getTrailersList();
         List<ReviewsResultsItem> reviewList = RequestDataTasks.getReviewsList();
         if (trailerList != null){
@@ -211,8 +215,11 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
     /**TrailerClickHandler onClick method**/
     @Override
-    public void onClick(VideoResultsItem trailer) {
-        String youtubeAuthority = "com.google.android.youtube";
+    public void onClickTrailer(VideoResultsItem trailer) {
+        Uri youtubeUri = Uri.parse("vnd.youtube:"+trailer.getKey());
+        Intent intent = new Intent(Intent.ACTION_VIEW, youtubeUri);
+        Log.i(TAG, "onClick for Trailer item was called. Uri: "+youtubeUri);
+        startActivity(intent);
     }
 
 
@@ -220,7 +227,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateTrailer();
+            updateContent();
         }
     }
 }

@@ -18,8 +18,8 @@ import java.util.List;
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.TrailersAdapterViewHolder> {
     final String TAG = getClass().getSimpleName();
-    List<VideoResultsItem> mTrailersList;
-    TrailerClickHandler mOnClickHandler;
+    private List<VideoResultsItem> mTrailersList;
+    private final TrailerClickHandler mOnClickHandler;
 
     public TrailersAdapter(TrailerClickHandler clickHandler){
         mOnClickHandler = clickHandler;
@@ -49,26 +49,28 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
         return 0;
     }
 
+    public interface TrailerClickHandler{
+        void onClickTrailer (VideoResultsItem trailer);
+    }
+
     class TrailersAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         final Context context;
+
         final TextView mTrailerName;
 
         public TrailersAdapterViewHolder(View itemView) {
             super(itemView);
             context = itemView.getContext();
             mTrailerName = (TextView) itemView.findViewById(R.id.tv_trailer_item_name);
+            itemView.setOnClickListener(this);
         }
-
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
             VideoResultsItem trailer = mTrailersList.get(position);
-            mOnClickHandler.onClick(trailer);
+            mOnClickHandler.onClickTrailer(trailer);
         }
-    }
 
-    public interface TrailerClickHandler{
-        void onClick (VideoResultsItem trailer);
     }
 
     public void setTrailersList(List<VideoResultsItem> trailersList){

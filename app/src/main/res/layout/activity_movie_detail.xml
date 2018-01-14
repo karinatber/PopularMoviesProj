@@ -59,7 +59,7 @@
         </RelativeLayout>
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:text="@string/trailers"
             android:id="@+id/tv_trailer_label"
             android:padding="16dp"/>
@@ -71,7 +71,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tv_reviews_label"
-            android:text="@string/review"/>
+            android:text="@string/review"
+            android:padding="16dp"/>
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

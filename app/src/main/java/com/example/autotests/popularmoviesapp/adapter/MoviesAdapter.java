@@ -25,7 +25,6 @@ import java.util.List;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
     public static final String TAG = MoviesAdapter.class.getSimpleName();
     private List<ResultsItem> mMovieData;
-    private Cursor mCursor;
     private final MoviesAdapterOnClickHandler mOnClickHandler;
 
     public interface MoviesAdapterOnClickHandler{
@@ -91,10 +90,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     public void setMovieData(List<ResultsItem> movieData){
         mMovieData = movieData;
-        notifyDataSetChanged();
-    }
-    public void setFavoritesCursor(Cursor cursor){
-        this.mCursor = cursor;
         notifyDataSetChanged();
     }
 }

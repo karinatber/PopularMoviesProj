@@ -1,5 +1,6 @@
 package com.example.autotests.popularmoviesapp;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -31,6 +32,7 @@ import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.google.gson.Gson;
 
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +50,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public MoviesAdapter mAdapter;
     private static String mSortBy;
     public List<ResultsItem> mMoviesList;
-    public Cursor mCursor;
 
     private static final int ID_FAVORITES_LOADER = 40;
-    private static final int ID_TMDB_LOADER = 41;
 
     public static final String EXTRA_MOVIE = "Movie";
     public static final String MOVIES = "Movies";
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             mAdapter.setMovieData(mMoviesList);
             mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
-            if (FAVORITES.equals(mSortBy)){
+            if (FAVORITES.equals(mSortBy)&&(mMoviesList.isEmpty())){
                 mLoaderManager.initLoader(ID_FAVORITES_LOADER, null, this);
             }
         } else {
@@ -111,8 +111,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             @Override
             public void onRefresh() {
                 if (!FAVORITES.equals(mSortBy)) {
+                    Log.i(TAG, "onRefresh: loadTMDBData");
                     loadTMDBData(mSortBy);
                 } else {
+                    Log.i(TAG, "onRefresh: loadFavorites");
                     loadFavorites();
                 }
                 mSwipeRefreshLayout.setRefreshing(false);
@@ -125,16 +127,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private void loadTMDBData(String sortBy) {
         showMoviesData();
         mSortBy = sortBy;
-//        mLoadIndicator.setVisibility(View.VISIBLE);
-//        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
-//        Bundle args = new Bundle();
-//        args.putString(SORT_BY, sortBy);
-//        getSupportLoaderManager().initLoader(ID_TMDB_LOADER, args, this);
         new RequestDataAsyncTask().execute(sortBy);
     }
+
     private void loadFavorites(){
         showMoviesData();
-        if(!mLoaderManager.hasRunningLoaders()){
+        if(mLoaderManager.getLoader(ID_FAVORITES_LOADER) == null){
             mLoaderManager.initLoader(ID_FAVORITES_LOADER, null, this);
         } else {
             mLoaderManager.restartLoader(ID_FAVORITES_LOADER, null, this);
@@ -183,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.i(TAG, "onCreateLoader was called.");
         mLoadIndicator.setVisibility(View.VISIBLE);
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
 
@@ -197,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.i(TAG, "onLoadFinished was called");
         mLoadIndicator.setVisibility(View.INVISIBLE);
         List<ResultsItem> favoritesList = new ArrayList<>();
         while (data.moveToNext()){
@@ -206,20 +206,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             favoritesList.add(movieItem);
         }
         if (favoritesList.isEmpty()){
+            Log.i(TAG, "onLoadFinished: favoritesList is empty");
             showNoFavoritesMsg();
             return;
         }
         showMoviesData();
         mMoviesList = favoritesList;
         mAdapter.setMovieData(favoritesList);
-//        mAdapter.setFavoritesCursor(data);
-//        mCursor = data;
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.v(TAG, "onLoaderReset was called");
-        mAdapter.setFavoritesCursor(null);
+        Log.i(TAG, "onLoaderReset was called");
         mAdapter.setMovieData(null);
     }
 
@@ -244,12 +242,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 Gson gson = new Gson();
                 MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
                 List<ResultsItem> listOfMovies = jsonAsObject.getResults();
-                //add all the values to the database
-//                List<ContentValues> cvList = new ArrayList<>();
-//                for (ResultsItem movieItem : listOfMovies){
-//                    cvList.add(createMovieItem(movieItem));
-//                }
-//                getContentResolver().bulkInsert(FavoritesEntry.CONTENT_URI, cvList.toArray(new ContentValues[listOfMovies.size()]));
                 return listOfMovies;
             } catch (Exception e) {
                 e.printStackTrace();
