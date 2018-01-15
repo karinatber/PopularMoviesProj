@@ -51,8 +51,6 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
     SQLiteDatabase mDb;
     ResultsItem mMovieDetails;
-    VideoResultsItem mTrailersList;
-    ReviewsResultsItem mReviewsList;
     private boolean isFavorite;
     TrailersAdapter mTrailersAdapter;
     ReviewsAdapter mReviewsAdapter;
