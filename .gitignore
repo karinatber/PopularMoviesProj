@@ -8,3 +8,5 @@
 /captures
 .externalNativeBuild
 /gradle.properties
+/.idea
+/gradle/wrapper/gradle-wrapper.properties
