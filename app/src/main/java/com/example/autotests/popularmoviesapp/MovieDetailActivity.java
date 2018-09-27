@@ -161,6 +161,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         ContentValues contentValues = new ContentValues();
         contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE, mMovieDetails.toString());
         contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_DATE, mMovieDetails.getReleaseDate());
+        contentValues.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_ID, mMovieDetails.getId());
         Uri uri = getContentResolver().insert(FavoriteMoviesContract.FavoritesEntry.CONTENT_URI, contentValues);
         if (uri != null) {
             Log.v(MainActivity.class.getSimpleName(), "Favorite added to database, Uri: " + uri);
@@ -170,15 +171,15 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
     private void removeFavorite(){
         Uri queryUri = FavoriteMoviesContract.FavoritesEntry.CONTENT_URI;
-        String where = FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE+"=?";
-        String[] selectionArgs = new String[]{mMovieDetails.toString()};
+        String where = FavoriteMoviesContract.FavoritesEntry.COLUMN_ID+"=?";
+        String[] selectionArgs = new String[]{String.valueOf(mMovieDetails.getId())};
         getContentResolver().delete(queryUri, where, selectionArgs);
     }
 
     public void isMovieFavorite(){
         Uri queryUri = FavoriteMoviesContract.FavoritesEntry.CONTENT_URI;
-        String selection = FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE+"=?";
-        String[] selectionArgs = new String[]{mMovieDetails.toString()};
+        String selection = FavoriteMoviesContract.FavoritesEntry.COLUMN_ID+"=?";
+        String[] selectionArgs = new String[]{String.valueOf(mMovieDetails.getId())};
         Cursor cursor = getContentResolver().query(queryUri, null, selection, selectionArgs, null);
         if ((cursor != null)&& (cursor.moveToFirst())){
             isFavorite = true;
