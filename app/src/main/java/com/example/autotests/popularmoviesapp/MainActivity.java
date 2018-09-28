@@ -1,8 +1,8 @@
 package com.example.autotests.popularmoviesapp;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -32,7 +33,6 @@ import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.google.gson.Gson;
 
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     ProgressBar mLoadIndicator;
     SwipeRefreshLayout mSwipeRefreshLayout;
     LoaderManager mLoaderManager;
+    Display mDisplay;
 
     public MoviesAdapter mAdapter;
     private static String mSortBy;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
         mNoFavesMsgDisplay = (TextView)findViewById(R.id.tv_no_favorites_message);
         mLoaderManager = getSupportLoaderManager();
+        mDisplay = getWindowManager().getDefaultDisplay();
         GridLayoutManager manager;
 
 
@@ -94,12 +96,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             loadTMDBData(mSortBy);
         }
 
-        int orientation = getOrientation();
-        if (orientation==VERTICAL) {
-            manager = new GridLayoutManager(this, 2);
-        } else {
-            manager = new GridLayoutManager(this, 3);
-        }
+        int[] spanValues = getSpanByDisplay();
+        manager = new GridLayoutManager(this, spanValues[0]);
+
 
         mMoviesRecyclerView.hasFixedSize();
 
@@ -307,10 +306,32 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         return super.onOptionsItemSelected(item);
     }
     public int getOrientation(){
-        Display display = getWindowManager().getDefaultDisplay();
-        if (display.getRotation() == Surface.ROTATION_0 || display.getRotation() == Surface.ROTATION_180)
+        if (mDisplay.getRotation() == Surface.ROTATION_0 || mDisplay.getRotation() == Surface.ROTATION_180)
             return VERTICAL;
         else
             return HORIZONTAL;
+    }
+
+    public int[] getSpanByDisplay(){
+        Point displaySize = getDisplaySize();
+        Log.i(TAG, "getSpanByDisplay: displaySize->  x: "+displaySize.x+" y: "+displaySize.y);
+//        int itemHeight = findViewById(R.id.iv_movie_poster).getHeight();
+//        int itemWidth = findViewById(R.id.iv_movie_poster).getWidth();
+        DisplayMetrics metrics = new DisplayMetrics();
+        mDisplay.getMetrics(metrics);
+        float density = getResources().getDisplayMetrics().density;
+        int convertFactor = (int)(160*density);
+        int[] spanxy = new int[]{
+                (int)displaySize.x/convertFactor,
+                (int)displaySize.y/convertFactor
+        };
+        Log.i(TAG, "getSpanByDisplay: span -> x: "+spanxy[0]+" y:"+spanxy[1]);
+        return spanxy;
+    }
+
+    public Point getDisplaySize(){
+        Point size = new Point();
+        mDisplay.getSize(size);
+        return size;
     }
 }
