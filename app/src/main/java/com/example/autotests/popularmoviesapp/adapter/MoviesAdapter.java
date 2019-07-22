@@ -1,7 +1,6 @@
 package com.example.autotests.popularmoviesapp.adapter;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,8 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.autotests.popularmoviesapp.R;
+import com.example.autotests.popularmoviesapp.model.Movie;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
-import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -24,11 +23,11 @@ import java.util.List;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
     public static final String TAG = MoviesAdapter.class.getSimpleName();
-    private List<ResultsItem> mMovieData;
+    private List<Movie> mMovieData;
     private final MoviesAdapterOnClickHandler mOnClickHandler;
 
     public interface MoviesAdapterOnClickHandler{
-        void onClick (ResultsItem movieDetails);
+        void onClick (Movie movieDetails);
     }
 
     public MoviesAdapter(MoviesAdapterOnClickHandler mOnClickHandler){
@@ -50,7 +49,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder holder, int position) {
         Log.i(TAG, "onBindViewHolder was called.");
-        ResultsItem movieItem = mMovieData.get(position);
+        Movie movieItem = mMovieData.get(position);
 
         String title = movieItem.getTitle();
         holder.mMovieTextItem.setText(title);
@@ -83,12 +82,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         @Override
         public void onClick(View view) {
             int adapterPosition = getAdapterPosition();
-            ResultsItem movieData = mMovieData.get(adapterPosition);
+            Movie movieData = mMovieData.get(adapterPosition);
             mOnClickHandler.onClick(movieData);
         }
     }
 
-    public void setMovieData(List<ResultsItem> movieData){
+    public void setMovieData(List<Movie> movieData){
         mMovieData = movieData;
         notifyDataSetChanged();
     }

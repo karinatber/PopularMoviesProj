@@ -1,16 +1,24 @@
-package com.example.autotests.popularmoviesapp.utils;
+package com.example.autotests.popularmoviesapp.model;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("com.asif.gsonpojogenerator")
-public class GenresItem{
+public class ProductionCountry {
+
+	@SerializedName("iso_3166_1")
+	private String iso31661;
 
 	@SerializedName("name")
 	private String name;
 
-	@SerializedName("id")
-	private int id;
+	public void setIso31661(String iso31661){
+		this.iso31661 = iso31661;
+	}
+
+	public String getIso31661(){
+		return iso31661;
+	}
 
 	public void setName(String name){
 		this.name = name;
@@ -18,13 +26,5 @@ public class GenresItem{
 
 	public String getName(){
 		return name;
-	}
-
-	public void setId(int id){
-		this.id = id;
-	}
-
-	public int getId(){
-		return id;
 	}
 }

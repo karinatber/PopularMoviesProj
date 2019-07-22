@@ -1,4 +1,4 @@
-package com.example.autotests.popularmoviesapp;
+package com.example.autotests.popularmoviesapp.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -20,16 +20,17 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.autotests.popularmoviesapp.R;
 import com.example.autotests.popularmoviesapp.adapter.ReviewsAdapter;
 import com.example.autotests.popularmoviesapp.adapter.TrailersAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
+import com.example.autotests.popularmoviesapp.model.Movie;
 import com.example.autotests.popularmoviesapp.sync.RequestDataIntentService;
 import com.example.autotests.popularmoviesapp.sync.RequestDataTasks;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
-import com.example.autotests.popularmoviesapp.utils.ResultsItem;
-import com.example.autotests.popularmoviesapp.utils.reviews.ReviewsResultsItem;
-import com.example.autotests.popularmoviesapp.utils.videos.VideoResultsItem;
+import com.example.autotests.popularmoviesapp.model.reviews.Review;
+import com.example.autotests.popularmoviesapp.model.videos.Trailer;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -50,7 +51,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     public RecyclerView mReviewRecyclerView;
 
     SQLiteDatabase mDb;
-    ResultsItem mMovieDetails;
+    Movie mMovieDetails;
     private boolean isFavorite;
     TrailersAdapter mTrailersAdapter;
     ReviewsAdapter mReviewsAdapter;
@@ -200,8 +201,8 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         startService(intent);
     }
     public void updateContent(){
-        List<VideoResultsItem> trailerList = RequestDataTasks.getTrailersList();
-        List<ReviewsResultsItem> reviewList = RequestDataTasks.getReviewsList();
+        List<Trailer> trailerList = RequestDataTasks.getTrailersList();
+        List<Review> reviewList = RequestDataTasks.getReviewsList();
         if (trailerList != null){
             mTrailersAdapter.setTrailersList(trailerList);
             mTrailerRecyclerView.setVisibility(View.VISIBLE);
@@ -214,7 +215,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
     /**TrailerClickHandler onClick method**/
     @Override
-    public void onClickTrailer(VideoResultsItem trailer) {
+    public void onClickTrailer(Trailer trailer) {
         Uri youtubeUri = Uri.parse("vnd.youtube:"+trailer.getKey());
         Intent intent = new Intent(Intent.ACTION_VIEW, youtubeUri);
         Log.i(TAG, "onClick for Trailer item was called. Uri: "+youtubeUri);

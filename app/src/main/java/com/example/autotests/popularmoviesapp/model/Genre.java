@@ -1,16 +1,16 @@
-package com.example.autotests.popularmoviesapp.utils;
+package com.example.autotests.popularmoviesapp.model;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("com.asif.gsonpojogenerator")
-public class SpokenLanguagesItem{
+public class Genre {
 
 	@SerializedName("name")
 	private String name;
 
-	@SerializedName("iso_639_1")
-	private String iso6391;
+	@SerializedName("id")
+	private int id;
 
 	public void setName(String name){
 		this.name = name;
@@ -20,11 +20,11 @@ public class SpokenLanguagesItem{
 		return name;
 	}
 
-	public void setIso6391(String iso6391){
-		this.iso6391 = iso6391;
+	public void setId(int id){
+		this.id = id;
 	}
 
-	public String getIso6391(){
-		return iso6391;
+	public int getId(){
+		return id;
 	}
 }

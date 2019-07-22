@@ -9,7 +9,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context="com.example.autotests.popularmoviesapp.MovieDetailActivity">
+        tools:context="com.example.autotests.popularmoviesapp.activity.MovieDetailActivity">
         <ImageView
             android:layout_width="250dp"
             android:layout_height="250dp"

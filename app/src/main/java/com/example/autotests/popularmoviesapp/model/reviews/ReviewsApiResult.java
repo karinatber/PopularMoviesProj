@@ -1,11 +1,11 @@
-package com.example.autotests.popularmoviesapp.utils.reviews;
+package com.example.autotests.popularmoviesapp.model.reviews;
 
 import java.util.List;
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("com.asif.gsonpojogenerator")
-public class ReviewsJson{
+public class ReviewsApiResult {
 
 	@SerializedName("id")
 	private int id;
@@ -17,7 +17,7 @@ public class ReviewsJson{
 	private int totalPages;
 
 	@SerializedName("results")
-	private List<ReviewsResultsItem> results;
+	private List<Review> results;
 
 	@SerializedName("total_results")
 	private int totalResults;
@@ -46,11 +46,11 @@ public class ReviewsJson{
 		return totalPages;
 	}
 
-	public void setResults(List<ReviewsResultsItem> results){
+	public void setResults(List<Review> results){
 		this.results = results;
 	}
 
-	public List<ReviewsResultsItem> getResults(){
+	public List<Review> getResults(){
 		return results;
 	}
 
@@ -65,7 +65,7 @@ public class ReviewsJson{
 	@Override
  	public String toString(){
 		return 
-			"ReviewsJson{" + 
+			"ReviewsApiResult{" +
 			"id = '" + id + '\'' + 
 			",page = '" + page + '\'' + 
 			",total_pages = '" + totalPages + '\'' + 

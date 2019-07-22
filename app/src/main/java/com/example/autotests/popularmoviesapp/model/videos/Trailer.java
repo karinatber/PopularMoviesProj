@@ -1,11 +1,11 @@
-package com.example.autotests.popularmoviesapp.utils.videos;
+package com.example.autotests.popularmoviesapp.model.videos;
 
 import com.google.gson.annotations.SerializedName;
 
 import javax.annotation.Generated;
 
 @Generated("com.asif.gsonpojogenerator")
-public class VideoResultsItem {
+public class Trailer {
 
 	@SerializedName("site")
 	private String site;
@@ -98,7 +98,7 @@ public class VideoResultsItem {
 	@Override
  	public String toString(){
 		return 
-			"ResultsItem{" + 
+			"Movie{" +
 			"site = '" + site + '\'' + 
 			",size = '" + size + '\'' + 
 			",iso_3166_1 = '" + iso31661 + '\'' + 

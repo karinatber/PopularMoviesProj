@@ -1,4 +1,4 @@
-package com.example.autotests.popularmoviesapp.utils;
+package com.example.autotests.popularmoviesapp.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,7 +11,7 @@ import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.asif.gsonpojogenerator")
-public class ResultsItem implements Parcelable{
+public class Movie implements Parcelable{
 
 	@SerializedName("overview")
 	private String overview;
@@ -194,14 +194,14 @@ public class ResultsItem implements Parcelable{
         parcel.writeInt(voteCount);
 	}
     /**Constructor used for parcel**/
-    public ResultsItem(Parcel parcel){
+    public Movie(Parcel parcel){
         overview = parcel.readString();
         originalLanguage = parcel.readString();
         originalTitle = parcel.readString();
         video = (boolean) parcel.readValue(null);
         title = parcel.readString();
         genreIds = new ArrayList<>();
-        parcel.readList(genreIds, ResultsItem.class.getClassLoader());
+        parcel.readList(genreIds, Movie.class.getClassLoader());
         posterPath = parcel.readString ();
         backdropPath = parcel.readValue(null);
         releaseDate = parcel.readString ();
@@ -212,14 +212,14 @@ public class ResultsItem implements Parcelable{
         voteCount = parcel.readInt();
     }
 
-    public static final Parcelable.Creator<ResultsItem> CREATOR
-            = new Parcelable.Creator<ResultsItem>() {
-        public ResultsItem createFromParcel(Parcel in) {
-            return new ResultsItem(in);
+    public static final Parcelable.Creator<Movie> CREATOR
+            = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
         }
 
-        public ResultsItem[] newArray(int size) {
-            return new ResultsItem[size];
+        public Movie[] newArray(int size) {
+            return new Movie[size];
         }
     };
 

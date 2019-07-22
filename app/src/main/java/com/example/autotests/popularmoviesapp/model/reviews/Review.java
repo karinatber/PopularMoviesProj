@@ -1,11 +1,11 @@
-package com.example.autotests.popularmoviesapp.utils.reviews;
+package com.example.autotests.popularmoviesapp.model.reviews;
 
 import com.google.gson.annotations.SerializedName;
 
 import javax.annotation.Generated;
 
 @Generated("com.asif.gsonpojogenerator")
-public class ReviewsResultsItem {
+public class Review {
 
 	@SerializedName("author")
 	private String author;
@@ -54,7 +54,7 @@ public class ReviewsResultsItem {
 	@Override
  	public String toString(){
 		return 
-			"ResultsItem{" + 
+			"Movie{" +
 			"author = '" + author + '\'' + 
 			",id = '" + id + '\'' + 
 			",content = '" + content + '\'' + 

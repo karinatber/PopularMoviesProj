@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.autotests.popularmoviesapp.R;
-import com.example.autotests.popularmoviesapp.utils.videos.VideoResultsItem;
+import com.example.autotests.popularmoviesapp.model.videos.Trailer;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
  */
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.TrailersAdapterViewHolder> {
-    private List<VideoResultsItem> mTrailersList;
+    private List<Trailer> mTrailersList;
     private final TrailerClickHandler mOnClickHandler;
 
     public TrailersAdapter(TrailerClickHandler clickHandler){
@@ -36,7 +36,7 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
 
     @Override
     public void onBindViewHolder(TrailersAdapterViewHolder holder, int position) {
-        VideoResultsItem trailer = mTrailersList.get(position);
+        Trailer trailer = mTrailersList.get(position);
         holder.mTrailerName.setText(trailer.getName());
     }
 
@@ -49,7 +49,7 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
     }
 
     public interface TrailerClickHandler{
-        void onClickTrailer (VideoResultsItem trailer);
+        void onClickTrailer (Trailer trailer);
     }
 
     class TrailersAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -66,13 +66,13 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
-            VideoResultsItem trailer = mTrailersList.get(position);
+            Trailer trailer = mTrailersList.get(position);
             mOnClickHandler.onClickTrailer(trailer);
         }
 
     }
 
-    public void setTrailersList(List<VideoResultsItem> trailersList){
+    public void setTrailersList(List<Trailer> trailersList){
         this.mTrailersList = trailersList;
         notifyDataSetChanged();
     }

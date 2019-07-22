@@ -1,8 +1,7 @@
-package com.example.autotests.popularmoviesapp;
+package com.example.autotests.popularmoviesapp.activity;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,24 +13,22 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.autotests.popularmoviesapp.R;
 import com.example.autotests.popularmoviesapp.adapter.MoviesAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
+import com.example.autotests.popularmoviesapp.model.Movie;
 import com.example.autotests.popularmoviesapp.utils.DisplayUtils;
-import com.example.autotests.popularmoviesapp.utils.MoviesJson;
+import com.example.autotests.popularmoviesapp.model.MoviesApiResult;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
-import com.example.autotests.popularmoviesapp.utils.ResultsItem;
 import com.google.gson.Gson;
 
 import java.net.URL;
@@ -51,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     public MoviesAdapter mAdapter;
     private static String mSortBy;
-    public List<ResultsItem> mMoviesList;
+    public List<Movie> mMoviesList;
 
     private static final int ID_FAVORITES_LOADER = 40;
 
@@ -173,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
 
     @Override
-    public void onClick(ResultsItem movieDetails) {
+    public void onClick(Movie movieDetails) {
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra(EXTRA_MOVIE, movieDetails);
         startActivity(intent);
@@ -198,10 +195,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         Log.i(TAG, "onLoadFinished was called");
         mLoadIndicator.setVisibility(View.INVISIBLE);
-        List<ResultsItem> favoritesList = new ArrayList<>();
+        List<Movie> favoritesList = new ArrayList<>();
         while (data.moveToNext()){
             Gson gson = new Gson();
-            ResultsItem movieItem = gson.fromJson(data.getString(data.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), ResultsItem.class);
+            Movie movieItem = gson.fromJson(data.getString(data.getColumnIndex(FavoriteMoviesContract.FavoritesEntry.COLUMN_TITLE)), Movie.class);
             Log.i(TAG, "Movie Item name: " + movieItem.getTitle());
             favoritesList.add(movieItem);
         }
@@ -223,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
 
 
-    public class RequestDataAsyncTask extends AsyncTask<String, Void, List<ResultsItem>> {
+    public class RequestDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
 
         @Override
         protected void onPreExecute() {
@@ -233,15 +230,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         }
 
         @Override
-        protected List<ResultsItem> doInBackground(String... strings) {
+        protected List<Movie> doInBackground(String... strings) {
             String queryText = strings[0];
             String resultsAsJson;
             try {
                 URL requestUrl = NetworkUtils.buildUrl(queryText);
                 resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
                 Gson gson = new Gson();
-                MoviesJson jsonAsObject = gson.fromJson(resultsAsJson, MoviesJson.class);
-                List<ResultsItem> listOfMovies = jsonAsObject.getResults();
+                MoviesApiResult jsonAsObject = gson.fromJson(resultsAsJson, MoviesApiResult.class);
+                List<Movie> listOfMovies = jsonAsObject.getMovies();
                 return listOfMovies;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -250,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         }
 
         @Override
-        protected void onPostExecute(List<ResultsItem> listOfMovies) {
+        protected void onPostExecute(List<Movie> listOfMovies) {
             super.onPostExecute(listOfMovies);
             mLoadIndicator.setVisibility(View.INVISIBLE);
             if (listOfMovies == null) {

@@ -1,10 +1,10 @@
-package com.example.autotests.popularmoviesapp.utils;
+package com.example.autotests.popularmoviesapp.model;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.SerializedName;
 
 @Generated("com.asif.gsonpojogenerator")
-public class ProductionCompaniesItem{
+public class ProductionCompany {
 
 	@SerializedName("name")
 	private String name;

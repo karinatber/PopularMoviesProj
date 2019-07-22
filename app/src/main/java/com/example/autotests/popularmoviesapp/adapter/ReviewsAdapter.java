@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.autotests.popularmoviesapp.R;
-import com.example.autotests.popularmoviesapp.utils.reviews.ReviewsResultsItem;
+import com.example.autotests.popularmoviesapp.model.reviews.Review;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsAdapterViewHolder> {
     final String TAG = getClass().getSimpleName();
-    List<ReviewsResultsItem> mReviewData;
+    List<Review> mReviewData;
 
     public ReviewsAdapter(){
 
@@ -35,7 +35,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsA
 
     @Override
     public void onBindViewHolder(ReviewsAdapterViewHolder holder, int position) {
-        ReviewsResultsItem review = mReviewData.get(position);
+        Review review = mReviewData.get(position);
 
         holder.mReviewAuthor.setText(review.getAuthor());
         holder.mReviewBody.setText(review.getContent());
@@ -61,7 +61,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsA
         }
     }
 
-    public void setReviewData(List<ReviewsResultsItem> reviewData){
+    public void setReviewData(List<Review> reviewData){
         mReviewData = reviewData;
         notifyDataSetChanged();
     }

@@ -2,12 +2,12 @@ package com.example.autotests.popularmoviesapp.sync;
 
 import android.content.Context;
 
-import com.example.autotests.popularmoviesapp.MovieDetailActivity;
+import com.example.autotests.popularmoviesapp.activity.MovieDetailActivity;
+import com.example.autotests.popularmoviesapp.model.reviews.ReviewsApiResult;
+import com.example.autotests.popularmoviesapp.model.videos.TrailersApiResult;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
-import com.example.autotests.popularmoviesapp.utils.reviews.ReviewsJson;
-import com.example.autotests.popularmoviesapp.utils.reviews.ReviewsResultsItem;
-import com.example.autotests.popularmoviesapp.utils.videos.TrailersJson;
-import com.example.autotests.popularmoviesapp.utils.videos.VideoResultsItem;
+import com.example.autotests.popularmoviesapp.model.reviews.Review;
+import com.example.autotests.popularmoviesapp.model.videos.Trailer;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -23,8 +23,8 @@ public class RequestDataTasks {
     public static final String ACTION_REQUESTS_FINISHED = "request-finished";
     public static final String MOVIE_ID = "movie-id";
 
-    static List<VideoResultsItem> mTrailersList;
-    static List<ReviewsResultsItem> mReviewsList;
+    static List<Trailer> mTrailersList;
+    static List<Review> mReviewsList;
 
     public static void executeTask(Context context, String action, int id){
         if (ACTION_REQUEST_TRAILERS.equals(action)){
@@ -38,7 +38,7 @@ public class RequestDataTasks {
         try {
             String jsonStr = NetworkUtils.getResponseFromHttpUrl(NetworkUtils.buildExtraURL(id, MovieDetailActivity.VIDEO));
             Gson gson = new Gson();
-            TrailersJson trailers = gson.fromJson(jsonStr, TrailersJson.class);
+            TrailersApiResult trailers = gson.fromJson(jsonStr, TrailersApiResult.class);
             if (trailers != null){
                 mTrailersList = trailers.getResults();
             }
@@ -51,7 +51,7 @@ public class RequestDataTasks {
         try{
             String jsonStr = NetworkUtils.getResponseFromHttpUrl(NetworkUtils.buildExtraURL(id, MovieDetailActivity.REVIEW));
             Gson gson = new Gson();
-            ReviewsJson reviews = gson.fromJson(jsonStr, ReviewsJson.class);
+            ReviewsApiResult reviews = gson.fromJson(jsonStr, ReviewsApiResult.class);
             if (reviews != null){
                 mReviewsList = reviews.getResults();
             }
@@ -60,11 +60,11 @@ public class RequestDataTasks {
         }
     }
 
-    public static List<VideoResultsItem> getTrailersList(){
+    public static List<Trailer> getTrailersList(){
         return mTrailersList;
     }
 
-    public static List<ReviewsResultsItem> getReviewsList(){
+    public static List<Review> getReviewsList(){
         return mReviewsList;
     }
 }

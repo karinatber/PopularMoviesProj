@@ -1,4 +1,4 @@
-package com.example.autotests.popularmoviesapp.utils;
+package com.example.autotests.popularmoviesapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -7,7 +7,7 @@ import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.asif.gsonpojogenerator")
-public class MoviesJson{
+public class MoviesApiResult {
 
 	@SerializedName("page")
 	private int page;
@@ -16,7 +16,7 @@ public class MoviesJson{
 	private int totalPages;
 
 	@SerializedName("results")
-	private List<ResultsItem> results;
+	private List<Movie> results;
 
 	@SerializedName("total_results")
 	private int totalResults;
@@ -37,11 +37,11 @@ public class MoviesJson{
 		return totalPages;
 	}
 
-	public void setResults(List<ResultsItem> results){
+	public void setMovies(List<Movie> results){
 		this.results = results;
 	}
 
-	public List<ResultsItem> getResults(){
+	public List<Movie> getMovies(){
 		return results;
 	}
 
