@@ -88,7 +88,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
         mMovieTitle.setText(mMovieDetails.getTitle());
         mMovieOverview.setText(mMovieDetails.getOverview());
-        String editedDate = formatDate(mMovieDetails.getReleaseDate());
+        String editedDate = mMovieDetails.getReleaseDate();
         mReleaseDate.setText(editedDate);
         mRatingMovie.setRating(mMovieDetails.getVoteAverage()/2);
         if(isFavorite){
@@ -115,12 +115,12 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         mTrailerRecyclerView.setAdapter(mTrailersAdapter);
     }
 
-    public String formatDate(String originalDate){
-        String[] list = originalDate.split("-");
-        String editedDate="";
-        editedDate = list[1]+"/"+list[2]+"/"+list[0];
-        return editedDate;
-    }
+//    public String formatDate(String originalDate){
+//        String[] list = originalDate.split("-");
+//        String editedDate="";
+//        editedDate = list[1]+"/"+list[2]+"/"+list[0];
+//        return editedDate;
+//    }
 
     @Override
     protected void onResume() {

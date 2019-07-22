@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.example.autotests.popularmoviesapp.adapter.MoviesAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
+import com.example.autotests.popularmoviesapp.utils.DisplayUtils;
 import com.example.autotests.popularmoviesapp.utils.MoviesJson;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.example.autotests.popularmoviesapp.utils.ResultsItem;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     ProgressBar mLoadIndicator;
     SwipeRefreshLayout mSwipeRefreshLayout;
     LoaderManager mLoaderManager;
-    Display mDisplay;
+    DisplayUtils mDisplayUtils;
 
     public MoviesAdapter mAdapter;
     private static String mSortBy;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
         mNoFavesMsgDisplay = (TextView)findViewById(R.id.tv_no_favorites_message);
         mLoaderManager = getSupportLoaderManager();
-        mDisplay = getWindowManager().getDefaultDisplay();
+        mDisplayUtils = new DisplayUtils(getWindowManager(), this);
         GridLayoutManager manager;
 
 
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             loadTMDBData(mSortBy);
         }
 
-        int[] spanValues = getSpanByDisplay();
+        int[] spanValues = mDisplayUtils.getSpanByDisplay();
         manager = new GridLayoutManager(this, spanValues[0]);
 
 
@@ -304,34 +305,5 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-    public int getOrientation(){
-        if (mDisplay.getRotation() == Surface.ROTATION_0 || mDisplay.getRotation() == Surface.ROTATION_180)
-            return VERTICAL;
-        else
-            return HORIZONTAL;
-    }
-
-    public int[] getSpanByDisplay(){
-        Point displaySize = getDisplaySize();
-        Log.i(TAG, "getSpanByDisplay: displaySize->  x: "+displaySize.x+" y: "+displaySize.y);
-//        int itemHeight = findViewById(R.id.iv_movie_poster).getHeight();
-//        int itemWidth = findViewById(R.id.iv_movie_poster).getWidth();
-        DisplayMetrics metrics = new DisplayMetrics();
-        mDisplay.getMetrics(metrics);
-        float density = getResources().getDisplayMetrics().density;
-        int convertFactor = (int)(160*density);
-        int[] spanxy = new int[]{
-                (int)displaySize.x/convertFactor,
-                (int)displaySize.y/convertFactor
-        };
-        Log.i(TAG, "getSpanByDisplay: span -> x: "+spanxy[0]+" y:"+spanxy[1]);
-        return spanxy;
-    }
-
-    public Point getDisplaySize(){
-        Point size = new Point();
-        mDisplay.getSize(size);
-        return size;
     }
 }

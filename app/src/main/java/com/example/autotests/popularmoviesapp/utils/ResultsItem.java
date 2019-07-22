@@ -124,7 +124,10 @@ public class ResultsItem implements Parcelable{
 	}
 
 	public String getReleaseDate(){
-		return releaseDate;
+		String[] list = releaseDate.split("-");
+		String editedDate="";
+		editedDate = list[1]+"/"+list[2]+"/"+list[0];
+		return editedDate;
 	}
 
 	public void setVoteAverage(float voteAverage){
