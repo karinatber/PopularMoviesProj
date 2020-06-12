@@ -1,11 +1,14 @@
 package com.example.autotests.popularmoviesapp.model.videos;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 import javax.annotation.Generated;
 
 @Generated("com.asif.gsonpojogenerator")
-public class Trailer {
+public class Trailer implements Parcelable {
 
 	@SerializedName("site")
 	private String site;
@@ -109,4 +112,41 @@ public class Trailer {
 			",key = '" + key + '\'' + 
 			"}";
 		}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(site);
+		dest.writeInt(size);
+		dest.writeString(iso31661);
+		dest.writeString(name);
+		dest.writeString(id);
+		dest.writeString(iso6391);
+		dest.writeString(key);
+	}
+
+	public Trailer(Parcel parcel){
+		site = parcel.readString();
+		size = parcel.readInt();
+		iso31661 = parcel.readString();
+		name = parcel.readString();
+		id = parcel.readString();
+		iso6391 = parcel.readString();
+		key = parcel.readString();
+	}
+
+	public static final Parcelable.Creator<Trailer> CREATOR
+			= new Parcelable.Creator<Trailer>() {
+		public Trailer createFromParcel(Parcel in) {
+			return new Trailer(in);
+		}
+
+		public Trailer[] newArray(int size) {
+			return new Trailer[size];
+		}
+	};
 }

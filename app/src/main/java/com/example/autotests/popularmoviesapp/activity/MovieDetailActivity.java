@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,7 +26,9 @@ import com.example.autotests.popularmoviesapp.adapter.ReviewsAdapter;
 import com.example.autotests.popularmoviesapp.adapter.TrailersAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesDbHelper;
+import com.example.autotests.popularmoviesapp.interfaces.RequestDataHandlerInterface;
 import com.example.autotests.popularmoviesapp.model.Movie;
+import com.example.autotests.popularmoviesapp.receivers.RequestDataReceiver;
 import com.example.autotests.popularmoviesapp.sync.RequestDataIntentService;
 import com.example.autotests.popularmoviesapp.sync.RequestDataTasks;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
@@ -34,9 +37,10 @@ import com.example.autotests.popularmoviesapp.model.videos.Trailer;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener, TrailersAdapter.TrailerClickHandler{
+public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener, TrailersAdapter.TrailerClickHandler, RequestDataHandlerInterface {
     public static final String TAG = MovieDetailActivity.class.getSimpleName();
     public static final String VIDEO = "videos";
     public static final String REVIEW = "reviews";
@@ -82,7 +86,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         isMovieFavorite();
 
         mRequestFilter = new IntentFilter();
-        mReceiver = new RequestDataReceiver();
+        mReceiver = new RequestDataReceiver(this);
 
         mRequestFilter.addAction(RequestDataTasks.ACTION_REQUESTS_FINISHED);
 
@@ -222,12 +226,13 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         startActivity(intent);
     }
 
+    @Override
+    public void onRequestDataFinished(List<Movie> movies) {
 
-    private class RequestDataReceiver extends BroadcastReceiver{
+    }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateContent();
-        }
+    @Override
+    public void onDataReady(String actionId, ArrayList<Parcelable> data) {
+        // TODO: handle data arrival
     }
 }

@@ -34,7 +34,7 @@ dependencies {
     //picasso dependencies
     implementation 'com.squareup.picasso:picasso:2.5.2'
     testImplementation 'junit:junit:4.12'
-    implementation 'com.google.code.gson:gson:2.8.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'javax.annotation:javax.annotation-api:1.2'
     implementation 'com.jakewharton:butterknife:8.4.0'
 }

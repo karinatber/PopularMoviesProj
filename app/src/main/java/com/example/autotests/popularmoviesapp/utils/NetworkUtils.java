@@ -70,7 +70,7 @@ public class NetworkUtils {
         }
     }
 
-    public static URL buildExtraURL(int id, String type){
+    public static URL buildExtraURL(String id, String type){
         Uri videoUri = Uri.parse(BASE_URL+id+"/"+type)
                 .buildUpon()
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)

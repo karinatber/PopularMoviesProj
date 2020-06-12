@@ -25,7 +25,9 @@ import com.example.autotests.popularmoviesapp.R;
 import com.example.autotests.popularmoviesapp.adapter.MoviesAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
+import com.example.autotests.popularmoviesapp.interfaces.RequestDataHandlerInterface;
 import com.example.autotests.popularmoviesapp.model.Movie;
+import com.example.autotests.popularmoviesapp.task.RequestMoviesAsyncTask;
 import com.example.autotests.popularmoviesapp.utils.DisplayUtils;
 import com.example.autotests.popularmoviesapp.model.MoviesApiResult;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
@@ -35,7 +37,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler, LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler,
+        LoaderManager.LoaderCallbacks<Cursor>, RequestDataHandlerInterface {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     RecyclerView mMoviesRecyclerView;
@@ -49,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public MoviesAdapter mAdapter;
     private static String mSortBy;
     public List<Movie> mMoviesList;
+
+    private RequestMoviesAsyncTask mRequestMoviesAsyncTask;
 
     private static final int ID_FAVORITES_LOADER = 40;
 
@@ -72,14 +77,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mErrorMsgDisplay = (TextView)findViewById(R.id.tv_error_message);
         mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
         mNoFavesMsgDisplay = (TextView)findViewById(R.id.tv_no_favorites_message);
+
         mLoaderManager = getSupportLoaderManager();
         mDisplayUtils = new DisplayUtils(getWindowManager(), this);
+        mAdapter = new MoviesAdapter(this);
+
+        mRequestMoviesAsyncTask = new RequestMoviesAsyncTask(this);
         GridLayoutManager manager;
 
-
-        mAdapter = new MoviesAdapter(this);
         mSortBy = POPULARITY;
-
 
         if (savedInstanceState != null) {
             mMoviesList = savedInstanceState.getParcelableArrayList(MOVIES);
@@ -97,12 +103,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         int[] spanValues = mDisplayUtils.getSpanByDisplay();
         manager = new GridLayoutManager(this, spanValues[0]);
 
-
         mMoviesRecyclerView.hasFixedSize();
-
         mMoviesRecyclerView.setLayoutManager(manager);
-
         mMoviesRecyclerView.setAdapter(mAdapter);
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -123,8 +127,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private void loadTMDBData(String sortBy) {
         showMoviesData();
+        mLoadIndicator.setVisibility(View.VISIBLE);
         mSortBy = sortBy;
-        new RequestDataAsyncTask().execute(sortBy);
+        mRequestMoviesAsyncTask.execute(sortBy);
     }
 
     private void loadFavorites(){
@@ -218,49 +223,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mAdapter.setMovieData(null);
     }
 
-
-
-    public class RequestDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-            mLoadIndicator.setVisibility(View.VISIBLE);
+    @Override
+    public void onRequestDataFinished(List<Movie> movies) {
+        mLoadIndicator.setVisibility(View.INVISIBLE);
+        if(movies == null || movies.isEmpty()) {
+            showErrorMsg();
+            return;
         }
-
-        @Override
-        protected List<Movie> doInBackground(String... strings) {
-            String queryText = strings[0];
-            String resultsAsJson;
-            try {
-                URL requestUrl = NetworkUtils.buildUrl(queryText);
-                resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
-                Gson gson = new Gson();
-                MoviesApiResult jsonAsObject = gson.fromJson(resultsAsJson, MoviesApiResult.class);
-                List<Movie> listOfMovies = jsonAsObject.getMovies();
-                return listOfMovies;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> listOfMovies) {
-            super.onPostExecute(listOfMovies);
-            mLoadIndicator.setVisibility(View.INVISIBLE);
-            if (listOfMovies == null) {
-                showErrorMsg();
-            } else {
-                showMoviesData();
-                mAdapter.setMovieData(listOfMovies);
-                mMoviesList = listOfMovies;
-            }
-        }
-
+        mMoviesList = movies;
+        mAdapter.setMovieData(movies);
+        showMoviesData();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
