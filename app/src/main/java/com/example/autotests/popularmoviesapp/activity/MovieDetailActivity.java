@@ -66,14 +66,14 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         Intent intent = getIntent();
         mMovieDetails = intent.getParcelableExtra(MainActivity.EXTRA_MOVIE);
 
-        mMoviePoster = (ImageView) findViewById(R.id.iv_movie_detail_poster);
-        mMovieTitle = (TextView) findViewById(R.id.tv_movies_detail_title);
-        mMovieOverview = (TextView) findViewById(R.id.tv_movie_detail_overview);
-        mReleaseDate = (TextView)findViewById(R.id.tv_release_date);
-        mRatingMovie = (RatingBar)findViewById(R.id.rtb_movie_rating);
-        mBtnAddFav = (Button) findViewById(R.id.bt_movie_details_add_fav);
-        mTrailerRecyclerView = (RecyclerView)findViewById(R.id.rv_trailer_list);
-        mReviewRecyclerView = (RecyclerView) findViewById(R.id.rv_review_list);
+        mMoviePoster = findViewById(R.id.iv_movie_detail_poster);
+        mMovieTitle = findViewById(R.id.tv_movies_detail_title);
+        mMovieOverview = findViewById(R.id.tv_movie_detail_overview);
+        mReleaseDate = findViewById(R.id.tv_release_date);
+        mRatingMovie = findViewById(R.id.rtb_movie_rating);
+        mBtnAddFav = findViewById(R.id.bt_movie_details_add_fav);
+        mTrailerRecyclerView = findViewById(R.id.rv_trailer_list);
+        mReviewRecyclerView = findViewById(R.id.rv_review_list);
 
         mTrailersAdapter = new TrailersAdapter(this);
         mReviewsAdapter = new ReviewsAdapter();

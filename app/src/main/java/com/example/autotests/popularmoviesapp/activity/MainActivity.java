@@ -68,11 +68,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mMoviesRecyclerView = (RecyclerView)findViewById(R.id.rv_movies_list);
-        mErrorMsgDisplay = (TextView)findViewById(R.id.tv_error_message);
-        mLoadIndicator = (ProgressBar)findViewById(R.id.pb_loading_indicator);
-        mNoFavesMsgDisplay = (TextView)findViewById(R.id.tv_no_favorites_message);
-        mLoaderManager = getSupportLoaderManager();
+        mMoviesRecyclerView = findViewById(R.id.rv_movies_list);
+        mErrorMsgDisplay = findViewById(R.id.tv_error_message);
+        mLoadIndicator = findViewById(R.id.pb_loading_indicator);
+        mNoFavesMsgDisplay = findViewById(R.id.tv_no_favorites_message);
+        mLoaderManager = LoaderManager.getInstance(this);
         mDisplayUtils = new DisplayUtils(getWindowManager(), this);
         GridLayoutManager manager;
 

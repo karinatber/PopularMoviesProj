@@ -49,15 +49,15 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsA
         return 0;
     }
 
-    class ReviewsAdapterViewHolder extends RecyclerView.ViewHolder {
+    static class ReviewsAdapterViewHolder extends RecyclerView.ViewHolder {
         public final Context mContext;
         final TextView mReviewBody;
         final TextView mReviewAuthor;
         public ReviewsAdapterViewHolder(View itemView) {
             super(itemView);
             mContext = itemView.getContext();
-            mReviewBody = (TextView) itemView.findViewById(R.id.tv_review_body);
-            mReviewAuthor = (TextView) itemView.findViewById(R.id.tv_review_author);
+            mReviewBody = itemView.findViewById(R.id.tv_review_body);
+            mReviewAuthor = itemView.findViewById(R.id.tv_review_author);
         }
     }
 
