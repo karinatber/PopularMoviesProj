@@ -2,14 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.example.autotests.popularmoviesapp"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         // Please ensure you have a valid API KEY for themoviedb.org↵ to use this app
         // A valid key will need to be entered
         buildConfigField "String", "API_KEY", API_KEY
@@ -24,19 +23,18 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation 'com.google.firebase:firebase-appindexing:10.2.1'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
     //picasso dependencies
     implementation 'com.squareup.picasso:picasso:2.5.2'
     testImplementation 'junit:junit:4.12'
     implementation 'com.google.code.gson:gson:2.8.1'
     implementation 'javax.annotation:javax.annotation-api:1.2'
-    implementation 'com.jakewharton:butterknife:8.4.0'
 }
 repositories {
     mavenCentral()
