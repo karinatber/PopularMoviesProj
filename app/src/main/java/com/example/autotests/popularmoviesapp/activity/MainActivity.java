@@ -3,7 +3,7 @@ package com.example.autotests.popularmoviesapp.activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import androidx.loader.app.LoaderManager;
@@ -27,13 +27,10 @@ import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
 import com.example.autotests.popularmoviesapp.model.Movie;
 import com.example.autotests.popularmoviesapp.request.MoviesRequest;
+import com.example.autotests.popularmoviesapp.sync.GetMoviesTask;
 import com.example.autotests.popularmoviesapp.utils.DisplayUtils;
-import com.example.autotests.popularmoviesapp.model.MoviesApiResult;
-import com.example.autotests.popularmoviesapp.utils.HttpRequest;
-import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.google.gson.Gson;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private static String mSortBy;
     public List<Movie> mMoviesList;
 
-    MoviesRequest mMoviesRequest;
+    GetMoviesTask mGetMoviesTask;
 
     private static final int ID_FAVORITES_LOADER = 40;
 
@@ -83,15 +80,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         mAdapter = new MoviesAdapter(this);
         mSortBy = POPULARITY;
-        mMoviesRequest = new MoviesRequest();
+        mGetMoviesTask = new GetMoviesTask();
 
         if (savedInstanceState != null) {
             mMoviesList = savedInstanceState.getParcelableArrayList(MOVIES);
             mAdapter.setMovieData(mMoviesList);
             mSortBy = savedInstanceState.getString(SORT_BY);
             Log.d(TAG, "onCreate: savedInstanceState is NOT null");
-            if (FAVORITES.equals(mSortBy)&&(mMoviesList.isEmpty())){
-                mLoaderManager.initLoader(ID_FAVORITES_LOADER, null, this);
+            if (mMoviesList.isEmpty()){
+                updateMoviesList(mSortBy);
             }
         } else {
             Log.d(TAG, "onCreate: savedInstanceState is null");
@@ -111,17 +108,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (!FAVORITES.equals(mSortBy)) {
-                    Log.i(TAG, "onRefresh: loadTMDBData");
-                    loadTMDBData(mSortBy);
-                } else {
-                    Log.i(TAG, "onRefresh: loadFavorites");
-                    loadFavorites();
-                }
+                updateMoviesList(mSortBy);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
 
+    }
+
+    private void updateMoviesList(String sortBy) {
+        if(POPULARITY.equals(sortBy) || TOP_RATED.equals(sortBy)) {
+            loadTMDBData(sortBy);
+        } else if(FAVORITES.equals(sortBy)) {
+            loadFavorites();
+        }
     }
 
 
@@ -129,10 +128,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         showMoviesData();
         mSortBy = sortBy;
         // TODO: handle API < 24
-        mMoviesRequest.getMoviesList(mSortBy).thenAccept((moviesApiResult -> {
-            showMoviesData();
-            setMoviesList(moviesApiResult.getMovies());
-        }));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mGetMoviesTask.setListType(mSortBy);
+            mGetMoviesTask.execute().thenAccept((movies -> {
+                showMoviesData();
+                setMoviesList(movies);
+            }));
+        }
     }
 
     private void loadFavorites(){
@@ -151,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             outState.putParcelableArrayList(MOVIES, (ArrayList<? extends Parcelable>) mMoviesList);
             outState.putString(SORT_BY, mSortBy);
             Log.d(TAG, "onSaveInstanceState -> Sort by: "+mSortBy);
-            //outPersistentState.putString(SORT_BY, mSortBy);
         }
         super.onSaveInstanceState(outState);
     }
