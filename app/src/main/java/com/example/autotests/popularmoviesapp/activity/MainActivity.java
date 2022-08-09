@@ -26,8 +26,10 @@ import com.example.autotests.popularmoviesapp.adapter.MoviesAdapter;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract;
 import com.example.autotests.popularmoviesapp.data.FavoriteMoviesContract.FavoritesEntry;
 import com.example.autotests.popularmoviesapp.model.Movie;
+import com.example.autotests.popularmoviesapp.request.MoviesRequest;
 import com.example.autotests.popularmoviesapp.utils.DisplayUtils;
 import com.example.autotests.popularmoviesapp.model.MoviesApiResult;
+import com.example.autotests.popularmoviesapp.utils.HttpRequest;
 import com.example.autotests.popularmoviesapp.utils.NetworkUtils;
 import com.google.gson.Gson;
 
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public MoviesAdapter mAdapter;
     private static String mSortBy;
     public List<Movie> mMoviesList;
+
+    MoviesRequest mMoviesRequest;
 
     private static final int ID_FAVORITES_LOADER = 40;
 
@@ -79,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         mAdapter = new MoviesAdapter(this);
         mSortBy = POPULARITY;
-
+        mMoviesRequest = new MoviesRequest();
 
         if (savedInstanceState != null) {
             mMoviesList = savedInstanceState.getParcelableArrayList(MOVIES);
@@ -124,7 +128,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private void loadTMDBData(String sortBy) {
         showMoviesData();
         mSortBy = sortBy;
-        new RequestDataAsyncTask().execute(sortBy);
+        // TODO: handle API < 24
+        mMoviesRequest.getMoviesList(mSortBy).thenAccept((moviesApiResult -> {
+            showMoviesData();
+            setMoviesList(moviesApiResult.getMovies());
+        }));
     }
 
     private void loadFavorites(){
@@ -146,6 +154,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             //outPersistentState.putString(SORT_BY, mSortBy);
         }
         super.onSaveInstanceState(outState);
+    }
+
+    public void setMoviesList(List<Movie> moviesList) {
+        mMoviesList = moviesList;
+        mAdapter.setMovieData(mMoviesList);
     }
 
     /* make error message visible */
@@ -216,49 +229,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void onLoaderReset(Loader<Cursor> loader) {
         Log.i(TAG, "onLoaderReset was called");
         mAdapter.setMovieData(null);
-    }
-
-
-
-    public class RequestDataAsyncTask extends AsyncTask<String, Void, List<Movie>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-            mLoadIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(String... strings) {
-            String queryText = strings[0];
-            String resultsAsJson;
-            try {
-                URL requestUrl = NetworkUtils.buildUrl(queryText);
-                resultsAsJson = NetworkUtils.getResponseFromHttpUrl(requestUrl);
-                Gson gson = new Gson();
-                MoviesApiResult jsonAsObject = gson.fromJson(resultsAsJson, MoviesApiResult.class);
-                List<Movie> listOfMovies = jsonAsObject.getMovies();
-                return listOfMovies;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> listOfMovies) {
-            super.onPostExecute(listOfMovies);
-            mLoadIndicator.setVisibility(View.INVISIBLE);
-            if (listOfMovies == null) {
-                showErrorMsg();
-            } else {
-                showMoviesData();
-                mAdapter.setMovieData(listOfMovies);
-                mMoviesList = listOfMovies;
-            }
-        }
-
     }
 
 

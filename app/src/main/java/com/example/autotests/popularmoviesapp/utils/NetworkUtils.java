@@ -18,8 +18,8 @@ import java.util.Scanner;
 public class NetworkUtils {
     /** API Urls**/
     private static final String TAG = NetworkUtils.class.getSimpleName();
-    private static final  String BASE_URL = "http://api.themoviedb.org/3/movie/";
-    private static final  String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
+    private static final  String BASE_URL = "https://api.themoviedb.org/3/movie/";
+    private static final  String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w185";
     private static String API_KEY_PARAM = "api_key";
     private static final String API_KEY = BuildConfig.API_KEY;
 
